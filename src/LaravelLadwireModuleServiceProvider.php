@@ -53,6 +53,7 @@ class LaravelLadwireModuleServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallLadwireModule::class,
+                InstallLadwireModuleClean::class,
                 MakeLadwireModule::class,
                 RemoveLadwireModule::class,
             ]);
