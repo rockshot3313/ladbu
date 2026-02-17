@@ -5,8 +5,10 @@ namespace Ladbu\LaravelLadwireModule;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
 use Ladbu\LaravelLadwireModule\Console\Commands\InstallLadwireModuleClean;
+use Ladbu\LaravelLadwireModule\Console\Commands\InstallLadwireModuleImproved;
 use Ladbu\LaravelLadwireModule\Console\Commands\MakeLadwireModule;
 use Ladbu\LaravelLadwireModule\Console\Commands\RemoveLadwireModule;
+use Ladbu\LaravelLadwireModule\Console\Commands\RemoveLadwireModuleImproved;
 
 class LaravelLadwireModuleServiceProvider extends ServiceProvider
 {
