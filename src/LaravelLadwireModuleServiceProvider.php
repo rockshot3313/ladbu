@@ -3,7 +3,8 @@
 namespace Ladbu\LaravelLadwireModule;
 
 use Illuminate\Support\ServiceProvider;
-use Ladbu\LaravelLadwireModule\Console\Commands\InstallLadwireModule;
+use Illuminate\Console\Scheduling\Schedule;
+use Ladbu\LaravelLadwireModule\Console\Commands\InstallLadwireModuleClean;
 use Ladbu\LaravelLadwireModule\Console\Commands\MakeLadwireModule;
 use Ladbu\LaravelLadwireModule\Console\Commands\RemoveLadwireModule;
 
