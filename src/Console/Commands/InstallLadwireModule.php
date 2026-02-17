@@ -153,6 +153,12 @@ class InstallLadwireModule extends Command
         // Create Livewire component class
         $componentPath = app_path("Livewire/{$className}.php");
         
+        // Ensure Livewire directory exists
+        $livewireDir = app_path("Livewire");
+        if (!File::exists($livewireDir)) {
+            File::makeDirectory($livewireDir, 0755, true);
+        }
+        
         $stub = $this->getLivewireComponentStub($className, $viewName);
         
         File::put($componentPath, $stub);
@@ -160,6 +166,12 @@ class InstallLadwireModule extends Command
         
         // Create Livewire component view
         $componentViewPath = resource_path("views/livewire/{$viewName}.blade.php");
+        
+        // Ensure livewire views directory exists
+        $livewireViewsDir = resource_path("views/livewire");
+        if (!File::exists($livewireViewsDir)) {
+            File::makeDirectory($livewireViewsDir, 0755, true);
+        }
         
         $viewStub = $this->getLivewireViewStub($viewName);
         
