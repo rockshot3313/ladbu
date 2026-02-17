@@ -59,7 +59,7 @@ php artisan flux:install
 2. **Publish views** (optional, if you want to customize them):
 
 ```bash
-php artisan vendor:publish --tag="ladwire-views" --provider="Ladbu\\LaravelLadwireModule\\LaravelLadwireModuleServiceProvider"
+php artisan vendor:publish --tag="views" --provider="Ladbu\\LaravelLadwireModule\\LaravelLadwireModuleServiceProvider"
 ```
 
 ### For Fresh Projects - Quick Start
@@ -290,7 +290,7 @@ Publish the views to customize them:
 php artisan vendor:publish --tag="views" --provider="Ladbu\\LaravelLadwireModule\\LaravelLadwireModuleServiceProvider"
 ```
 
-The views will be published to `resources/views/vendor/laravel-livewire-module/`.
+The views will be published to `resources/views/vendor/laravel-ladwire-module/`.
 
 ### Extending Components
 
@@ -301,7 +301,7 @@ You can extend the package components in your application:
 
 namespace App\Http\Livewire;
 
-use Ladbu\LaravelLivewireModule\Http\Livewire\Dashboard as BaseDashboard;
+use Ladbu\LaravelLadwireModule\Http\Livewire\Dashboard as BaseDashboard;
 
 class CustomDashboard extends BaseDashboard
 {

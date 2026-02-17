@@ -20,7 +20,7 @@ composer require ladbu/laravel-ladwire-module
 php artisan flux:install
 
 # Publish views (optional)
-php artisan vendor:publish --tag="ladwire-views"
+php artisan vendor:publish --tag="views" --provider="Ladbu\\LaravelLadwireModule\\LaravelLadwireModuleServiceProvider"
 
 # Run migrations
 php artisan migrate
@@ -41,7 +41,7 @@ composer require ladbu/laravel-ladwire-module
 php artisan flux:install
 
 # Publish views
-php artisan vendor:publish --tag="ladwire-views"
+php artisan vendor:publish --tag="views" --provider="Ladbu\\LaravelLadwireModule\\LaravelLadwireModuleServiceProvider"
 
 # Run migrations (if needed)
 php artisan migrate
@@ -87,9 +87,12 @@ php artisan test
 You can also test manually:
 
 1. **Visit Routes**:
-   - `/dashboard` - Dashboard module
-   - `/users` - User management
-   - `/settings` - Settings module
+   - `/module-dashboard` - Dashboard module
+   - `/module-users` - User management
+   - `/module-settings` - Settings module
+   - `/admin/dashboard` - Admin dashboard
+   - `/admin/users` - Admin user management
+   - `/admin/settings` - Admin settings
 
 2. **Check Components**:
    - All Livewire components should render
@@ -105,10 +108,15 @@ You can also test manually:
 
 Run tests with coverage:
 ```bash
+composer test
+```
+
+Or with coverage:
+```bash
 composer test --coverage-html
 ```
 
-Coverage reports will be generated in `storage/logs/coverage.html`
+Coverage reports will be generated in `build/logs/coverage.html`
 
 ### Troubleshooting
 
