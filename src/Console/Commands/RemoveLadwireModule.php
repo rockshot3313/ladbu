@@ -133,7 +133,7 @@ class RemoveLadwireModule extends Command
             $endMarker = "// END Ladwire Module: {$module}";
             
             if (str_contains($routeContent, $startMarker) && str_contains($routeContent, $endMarker)) {
-                $pattern = "/{$startMarker}.*?{$endMarker}/s";
+                $pattern = '/' . preg_quote($startMarker, '/') . '.*?' . preg_quote($endMarker, '/') . '/s';
                 $routeContent = preg_replace($pattern, '', $routeContent);
                 
                 // Remove empty lines
@@ -164,7 +164,7 @@ class RemoveLadwireModule extends Command
         $endMarker = "<!-- END Ladwire Module: {$module} -->";
         
         if (str_contains($sidebarContent, $startMarker) && str_contains($sidebarContent, $endMarker)) {
-            $pattern = "/{$startMarker}.*?{$endMarker}/s";
+            $pattern = '/' . preg_quote($startMarker, '/') . '.*?' . preg_quote($endMarker, '/') . '/s';
             $newSidebarContent = preg_replace($pattern, '', $sidebarContent);
             
             // Remove empty lines
