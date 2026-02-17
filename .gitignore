@@ -1,0 +1,38 @@
+/vendor/
+/node_modules/
+/npm-debug.log
+/yarn-error.log
+
+# Laravel specific
+.env
+.env.backup
+.env.local
+.env.php
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+/coverage/
+/phpunit.xml
+.phpunit.result.cache
+
+# Build artifacts
+/build/
+/dist/
+
+# Composer
+composer.lock
+
+# Package specific
+/tests/coverage/
+/coverage/

@@ -1,0 +1,54 @@
+{
+    "name": "ladbu/laravel-ladwire-module",
+    "description": "A modular Laravel package that adds Ladwire components to fresh Laravel projects",
+    "type": "laravel-package",
+    "keywords": ["laravel", "ladwire", "module", "package", "modular"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Your Name",
+            "email": "your.email@example.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0",
+        "livewire/livewire": "^3.0",
+        "fluxui/flux": "^1.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^7.0|^8.0",
+        "phpunit/phpunit": "^9.0|^10.0"
+    },
+    "suggest": {
+        "ladbu/laravel-ladwire-dashboard": "Install dashboard module for statistics and overview",
+        "ladbu/laravel-ladwire-user-management": "Install user management module for CRUD operations",
+        "ladbu/laravel-ladwire-settings": "Install settings module for configuration management"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ladbu\\LaravelLadwireModule\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ladbu\\LaravelLadwireModule\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ladbu\\LaravelLadwireModule\\LaravelLadwireModuleServiceProvider"
+            ]
+        }
+    },
+    "scripts": {
+        "test": "./tests/test.sh",
+        "test-coverage": "./tests/test.sh",
+        "post-install-cmd": [
+            "@php -r \"if (file_exists('vendor/autoload.php')) { echo '✅ Dependencies installed successfully!'; } else { echo '❌ Dependency installation failed!'; exit 1; }\""
+        ]
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
