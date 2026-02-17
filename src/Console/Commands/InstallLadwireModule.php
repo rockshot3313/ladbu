@@ -169,22 +169,97 @@ class InstallLadwireModule extends Command
 
     protected function getViewStub($name)
     {
-        $componentMap = [
-            'dashboard' => 'ladwire-dashboard',
-            'user-management' => 'ladwire-user-management',
-            'settings' => 'ladwire-settings',
-        ];
+        $title = match($name) {
+            'dashboard' => 'Dashboard',
+            'user-management' => 'User Management',
+            'settings' => 'Settings',
+            default => ucfirst($name)
+        };
         
-        $component = $componentMap[$name] ?? "ladwire-{$name}";
-        
-        return <<<BLADE
-@extends('layouts.app')
+        if ($name === 'dashboard') {
+            return <<<BLADE
+<x-layouts::app :title="__('{$title}')">
+    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
+        <div class="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white mb-2">150</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Total Users</div>
+                    </div>
+                </div>
+            </div>
+            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white mb-2">45</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Active Users</div>
+                    </div>
+                </div>
+            </div>
+            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white mb-2">320</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">Total Posts</div>
+                    </div>
+                </div>
+            </div>
+            <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-gray-900 dark:text-white mb-2">12</div>
+                        <div class="text-sm text-gray-600 dark:text-gray-400">New Today</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-6">
+            <div class="h-full overflow-y-auto">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium mr-3">JD</div>
+                            <div>
+                                <div class="font-medium text-gray-900 dark:text-white">John Doe</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Created new post</div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">2 minutes ago</div>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-medium mr-3">JS</div>
+                            <div>
+                                <div class="font-medium text-gray-900 dark:text-white">Jane Smith</div>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">Updated profile</div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">5 minutes ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-layouts::app>
+BLADE;
+        }
 
-@section('content')
-    <flux:main>
-        <livewire:{$component} />
-    </flux:main>
-@endsection
+        // Default view for other modules
+        return <<<BLADE
+<x-layouts::app :title="__('{$title}')">
+    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
+        <div class="relative h-full flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700 p-6">
+            <div class="h-full overflow-y-auto">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ $title }}</h3>
+                <div class="text-gray-600 dark:text-gray-400">
+                    This is the {$name} module. Customize this view to add your functionality.
+                </div>
+            </div>
+        </div>
+    </div>
+</x-layouts::app>
 BLADE;
     }
 
@@ -246,6 +321,35 @@ BLADE;
 
     protected function getControllerStub($name, $route)
     {
+        if ($name === 'Dashboard') {
+            return <<<PHP
+<?php
+
+namespace App\Http\Controllers;
+
+class {$name}Controller extends Controller
+{
+    public function __invoke()
+    {
+        \$stats = [
+            'total_users' => 150,
+            'active_users' => 45,
+            'total_posts' => 320,
+            'new_posts_today' => 12,
+        ];
+
+        \$recentActivity = [
+            ['user' => 'John Doe', 'action' => 'Created new post', 'time' => '2 minutes ago'],
+            ['user' => 'Jane Smith', 'action' => 'Updated profile', 'time' => '5 minutes ago'],
+            ['user' => 'Bob Johnson', 'action' => 'Deleted comment', 'time' => '10 minutes ago'],
+        ];
+
+        return view('ladwire.{$route}', compact('stats', 'recentActivity'));
+    }
+}
+PHP;
+        }
+
         return <<<PHP
 <?php
 
@@ -289,102 +393,92 @@ PHP;
     {
         if ($viewName === 'ladwire-dashboard') {
             return <<<BLADE
-<flux:heading>Dashboard</flux:heading>
+<div>
+    <flux:heading>Dashboard</flux:heading>
 
-<!-- Stats Grid -->
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
-        <div class="flex items-center">
-            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
-                <flux:icon name="layout-grid" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div class="ml-4">
-                <div class="text-sm text-zinc-600 dark:text-zinc-400">Total Users</div>
-                <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">150</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
-        <div class="flex items-center">
-            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
-                <flux:icon name="chevrons-up-down" class="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div class="ml-4">
-                <div class="text-sm text-zinc-600 dark:text-zinc-400">Active Users</div>
-                <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">45</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
-        <div class="flex items-center">
-            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
-                <flux:icon name="folder-git-2" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div class="ml-4">
-                <div class="text-sm text-zinc-600 dark:text-zinc-400">Total Posts</div>
-                <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">320</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
-        <div class="flex items-center">
-            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
-                <flux:icon name="book-open-text" class="w-6 h-6 text-orange-600 dark:text-orange-400" />
-            </div>
-            <div class="ml-4">
-                <div class="text-sm text-zinc-600 dark:text-zinc-400">New Posts Today</div>
-                <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">12</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Recent Activity -->
-<div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
-    <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700">
-        <flux:heading>Recent Activity</flux:heading>
-    </div>
-    
-    <div class="p-6">
-        <div class="space-y-4">
-            <div class="flex items-center justify-between py-3 border-b border-zinc-200 dark:border-zinc-700 last:border-b-0">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
-                        <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">JD</span>
-                    </div>
-                    <div class="ml-4">
-                        <div class="font-medium text-zinc-900 dark:text-zinc-100">John Doe</div>
-                        <div class="text-sm text-zinc-600 dark:text-zinc-400">Created new post</div>
-                    </div>
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                    <flux:icon name="layout-grid" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div class="text-sm text-zinc-500 dark:text-zinc-400">2 minutes ago</div>
-            </div>
-            
-            <div class="flex items-center justify-between py-3 border-b border-zinc-200 dark:border-zinc-700 last:border-b-0">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
-                        <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">JS</span>
-                    </div>
-                    <div class="ml-4">
-                        <div class="font-medium text-zinc-900 dark:text-zinc-100">Jane Smith</div>
-                        <div class="text-sm text-zinc-600 dark:text-zinc-400">Updated profile</div>
-                    </div>
+                <div class="ml-4">
+                    <div class="text-sm text-zinc-600 dark:text-zinc-400">Total Users</div>
+                    <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">150</div>
                 </div>
-                <div class="text-sm text-zinc-500 dark:text-zinc-400">5 minutes ago</div>
             </div>
-            
-            <div class="flex items-center justify-between py-3">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
-                        <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">BJ</span>
+        </div>
+
+        <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                    <flux:icon name="chevrons-up-down" class="w-6 h-6 text-green-600 dark:text-green-400" />
+                </div>
+                <div class="ml-4">
+                    <div class="text-sm text-zinc-600 dark:text-zinc-400">Active Users</div>
+                    <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">45</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                    <flux:icon name="folder-git-2" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div class="ml-4">
+                    <div class="text-sm text-zinc-600 dark:text-zinc-400">Total Posts</div>
+                    <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">320</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
+            <div class="flex items-center">
+                <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
+                    <flux:icon name="book-open-text" class="w-6 h-6 text-orange-600 dark:text-orange-400" />
+                </div>
+                <div class="ml-4">
+                    <div class="text-sm text-zinc-600 dark:text-zinc-400">New Posts Today</div>
+                    <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">12</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+        <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700">
+            <flux:heading>Recent Activity</flux:heading>
+        </div>
+        
+        <div class="p-6">
+            <div class="space-y-4">
+                <div class="flex items-center justify-between py-3 border-b border-zinc-200 dark:border-zinc-700">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">JD</span>
+                        </div>
+                        <div class="ml-4">
+                            <div class="font-medium text-zinc-900 dark:text-zinc-100">John Doe</div>
+                            <div class="text-sm text-zinc-600 dark:text-zinc-400">Created new post</div>
+                        </div>
                     </div>
-                    <div class="ml-4">
-                        <div class="font-medium text-zinc-900 dark:text-zinc-100">Bob Johnson</div>
-                        <div class="text-sm text-zinc-600 dark:text-zinc-400">Deleted comment</div>
+                    <div class="text-sm text-zinc-500 dark:text-zinc-400">2 minutes ago</div>
+                </div>
+                
+                <div class="flex items-center justify-between py-3">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">JS</span>
+                        </div>
+                        <div class="ml-4">
+                            <div class="font-medium text-zinc-900 dark:text-zinc-100">Jane Smith</div>
+                            <div class="text-sm text-zinc-600 dark:text-zinc-400">Updated profile</div>
+                        </div>
                     </div>
+                    <div class="text-sm text-zinc-500 dark:text-zinc-400">5 minutes ago</div>
                 </div>
                 <div class="text-sm text-zinc-500 dark:text-zinc-400">10 minutes ago</div>
             </div>

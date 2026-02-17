@@ -11,6 +11,8 @@ class UserManagement extends Component
 
     public $search = '';
     public $perPage = 10;
+    public $sortBy = 'name';
+    public $sortDirection = 'asc';
     public $showCreateModal = false;
     public $showEditModal = false;
     public $selectedUserId = null;
@@ -27,25 +29,60 @@ class UserManagement extends Component
 
     public function render()
     {
-        $users = $this->getUsers();
-
         return view('laravel-ladwire-user-management::livewire.user-management', [
-            'users' => $users,
+            'users' => $this->users,
         ]);
     }
 
-    protected function getUsers()
+    public function mount(): void
+    {
+        $this->loadUsers();
+    }
+
+    public function loadUsers(): void
     {
         // This is a mock implementation
         // In a real package, you would query the actual users table
-        return collect([
+        $query = collect([
             ['id' => 1, 'name' => 'John Doe', 'email' => 'john@example.com', 'role' => 'admin', 'created_at' => '2024-01-15'],
             ['id' => 2, 'name' => 'Jane Smith', 'email' => 'jane@example.com', 'role' => 'user', 'created_at' => '2024-01-16'],
             ['id' => 3, 'name' => 'Bob Johnson', 'email' => 'bob@example.com', 'role' => 'user', 'created_at' => '2024-01-17'],
-        ])->filter(function ($user) {
-            return str_contains(strtolower($user['name']), strtolower($this->search)) ||
-                   str_contains(strtolower($user['email']), strtolower($this->search));
-        })->paginate($this->perPage);
+        ]);
+
+        if ($this->search) {
+            $query = $query->filter(function ($user) {
+                return str_contains(strtolower($user['name']), strtolower($this->search)) ||
+                       str_contains(strtolower($user['email']), strtolower($this->search));
+            });
+        }
+
+        if ($this->sortBy) {
+            $query = $query->sortBy($this->sortBy, $this->sortDirection);
+        }
+
+        $this->users = $query->paginate($this->perPage);
+    }
+
+    public function sort($column): void
+    {
+        if ($this->sortBy === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $column;
+            $this->sortDirection = 'asc';
+        }
+        
+        $this->loadUsers();
+    }
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
     }
 
     public function createUser()
@@ -75,5 +112,10 @@ class UserManagement extends Component
     {
         // In a real implementation, you would delete the user here
         $this->dispatch('user-deleted');
+    }
+
+    public function paginationView(): string
+    {
+        return 'livewire.pagination-links';
     }
 }

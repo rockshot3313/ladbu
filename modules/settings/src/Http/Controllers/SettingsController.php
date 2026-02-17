@@ -13,6 +13,6 @@ class SettingsController
      */
     public function __invoke(Request $request): View|RedirectResponse
     {
-        return view('settings');
+        return view('laravel-ladwire-settings::settings');
     }
 }

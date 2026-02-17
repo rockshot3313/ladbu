@@ -160,13 +160,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 ```blade
 {{-- resources/views/ladwire/dashboard.blade.php --}}
-@extends('layouts.app')
-
-@section('content')
+<x-layouts::app :title="__('Dashboard')">
     <flux:main>
         <livewire:laravel-ladwire-dashboard::dashboard />
     </flux:main>
-@endsection
+</x-layouts::app>
 ```
 
 ## Usage

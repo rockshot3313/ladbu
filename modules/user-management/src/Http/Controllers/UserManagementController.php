@@ -13,6 +13,6 @@ class UserManagementController
      */
     public function __invoke(Request $request): View|RedirectResponse
     {
-        return view('user-management');
+        return view('laravel-ladwire-user-management::user-management');
     }
 }
