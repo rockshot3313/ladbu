@@ -43,9 +43,8 @@ class InstallLadwireModuleClean extends Command
 
         $this->newLine();
         $this->info('✅ Ladwire Module installation complete!');
-        $this->info('📁 Check your app/Http/Controllers folder for installed controllers.');
+        $this->info('📁 Check your resources/views/pages folder for installed components.');
         $this->info('📁 Check your routes/web.php for added routes.');
-        $this->info('⚙️  Run "php artisan vendor:publish --tag=views" to publish views.');
         
         return Command::SUCCESS;
     }
@@ -62,17 +61,11 @@ class InstallLadwireModuleClean extends Command
     {
         $this->info("Installing {$this->getModuleName($module)} module...");
         
-        // Create Livewire component
+        // Create single-file Livewire component
         $this->createLivewireComponent($module);
-        
-        // Create controller
-        $this->createController($module);
         
         // Create route
         $this->addRoute($module);
-        
-        // Create view
-        $this->createView($module);
         
         // Add to sidebar
         $this->addSidebarItem($module);
@@ -82,72 +75,25 @@ class InstallLadwireModuleClean extends Command
 
     protected function createLivewireComponent($module)
     {
-        $className = $this->getComponentClassName($module);
         $viewName = $this->getComponentViewName($module);
         
-        // Create Livewire component class
-        $componentPath = app_path("Livewire/{$className}.php");
+        // Create single-file Livewire component in pages directory
+        $componentPath = resource_path("views/pages/{$module}/⚡{$viewName}.blade.php");
         
-        // Ensure Livewire directory exists
-        $livewireDir = app_path("Livewire");
-        if (!File::exists($livewireDir)) {
-            File::makeDirectory($livewireDir, 0755, true);
+        // Ensure pages directory exists
+        $pagesDir = resource_path("views/pages/{$module}");
+        if (!File::exists($pagesDir)) {
+            File::makeDirectory($pagesDir, 0755, true);
         }
         
-        $stub = $this->getLivewireComponentStub($className, $viewName);
-        
-        File::put($componentPath, $stub);
-        $this->info("Created Livewire component: {$componentPath}");
-        
-        // Create Livewire component view
-        $componentViewPath = resource_path("views/livewire/{$viewName}.blade.php");
-        
-        // Ensure livewire views directory exists
-        $livewireViewsDir = resource_path("views/livewire");
-        if (!File::exists($livewireViewsDir)) {
-            File::makeDirectory($livewireViewsDir, 0755, true);
-        }
-        
-        $viewStub = $this->getLivewireViewStub($viewName);
-        
-        File::put($componentViewPath, $viewStub);
-        $this->info("Created Livewire view: {$componentViewPath}");
-    }
-
-    protected function createController($module)
-    {
-        $controllerClass = $this->getControllerClassName($module);
-        $controllerPath = app_path("Http/Controllers/{$controllerClass}.php");
-        
-        $templatePath = base_path("vendor/ladbu/laravel-ladwire-module/src/Templates/Controllers/{$controllerClass}.php");
+        $templatePath = base_path("vendor/ladbu/laravel-ladwire-module/modules/{$module}/resources/views/pages/⚡{$viewName}.blade.php");
         
         if (File::exists($templatePath)) {
             $content = File::get($templatePath);
-            File::put($controllerPath, $content);
-            $this->info("Created: {$controllerPath}");
+            File::put($componentPath, $content);
+            $this->info("Created Livewire component: {$componentPath}");
         } else {
-            $this->error("Controller template not found: {$templatePath}");
-        }
-    }
-
-    protected function createView($module)
-    {
-        $viewPath = resource_path("views/ladwire/{$module}.blade.php");
-        
-        // Ensure ladwire views directory exists
-        $viewDir = resource_path("views/ladwire");
-        if (!File::exists($viewDir)) {
-            File::makeDirectory($viewDir, 0755, true);
-        }
-        
-        $templatePath = base_path("vendor/ladbu/laravel-ladwire-module/src/Templates/Views/{$module}.blade.php");
-        
-        if (File::exists($templatePath)) {
-            $content = File::get($templatePath);
-            File::put($viewPath, $content);
-            $this->info("Created view: {$viewPath}");
-        } else {
-            $this->error("View template not found: {$templatePath}");
+            $this->error("Component template not found: {$templatePath}");
         }
     }
 
@@ -158,18 +104,8 @@ class InstallLadwireModuleClean extends Command
         if (File::exists($webRoutesPath)) {
             $routeContent = File::get($webRoutesPath);
             
-            // Add use statement if not present
-            $controllerClass = $this->getControllerClassName($module);
-            if (!str_contains($routeContent, "use App\\Http\\Controllers\\{$controllerClass};")) {
-                $routeContent = str_replace(
-                    "use Illuminate\\Support\\Facades\\Route;",
-                    "use Illuminate\\Support\\Facades\\Route;\nuse App\\Http\\Controllers\\{$controllerClass};",
-                    $routeContent
-                );
-            }
-            
-            // Add route with unique identifiers
-            $routeLine = "\n// Ladwire Module: {$module}\nRoute::get('/{$module}', {$controllerClass}::class)->name('{$module}'); // END Ladwire Module: {$module}";
+            // Add route with unique identifiers pointing to single-file component
+            $routeLine = "\n// Ladwire Module: {$module}\nRoute::get('/{$module}', function () {\n    return view('pages.{$module}.⚡{$this->getComponentViewName($module)}');\n})->name('{$module}'); // END Ladwire Module: {$module}";
             $routeContent .= $routeLine;
             
             File::put($webRoutesPath, $routeContent);
@@ -211,43 +147,6 @@ class InstallLadwireModuleClean extends Command
         }
     }
 
-    protected function getLivewireComponentStub($className, $viewName)
-    {
-        return <<<PHP
-<?php
-
-namespace App\Livewire;
-
-use Livewire\Component;
-
-class {$className} extends Component
-{
-    public function mount(): void
-    {
-        // Initialize component data
-    }
-
-    public function render()
-    {
-        return view('livewire.{$viewName}');
-    }
-}
-PHP;
-    }
-
-    protected function getLivewireViewStub($viewName)
-    {
-        return <<<BLADE
-<div>
-    <flux:heading>{{ ucfirst(str_replace('-', ' ', str_replace('ladwire-', '', $viewName))) }}</flux:heading>
-
-    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
-        <flux:text>This is the {$viewName} component. Customize this view to add your functionality.</flux:text>
-    </div>
-</div>
-BLADE;
-    }
-
     protected function getModuleName($module)
     {
         return match($module) {
@@ -258,16 +157,6 @@ BLADE;
         };
     }
 
-    protected function getComponentClassName($module)
-    {
-        return match($module) {
-            'dashboard' => 'LadwireDashboard',
-            'user-management' => 'LadwireUserManagement',
-            'settings' => 'LadwireSettings',
-            default => 'Ladwire' . ucfirst(Str::camel($module)),
-        };
-    }
-
     protected function getComponentViewName($module)
     {
         return match($module) {
@@ -275,16 +164,6 @@ BLADE;
             'user-management' => 'ladwire-user-management',
             'settings' => 'ladwire-settings',
             default => 'ladwire-' . $module,
-        };
-    }
-
-    protected function getControllerClassName($module)
-    {
-        return match($module) {
-            'dashboard' => 'DashboardController',
-            'user-management' => 'UserManagementController',
-            'settings' => 'SettingsController',
-            default => ucfirst($module) . 'Controller',
         };
     }
 

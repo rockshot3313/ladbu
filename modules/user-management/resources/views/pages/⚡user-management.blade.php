@@ -1,99 +1,319 @@
 <?php
 
+use App\Models\User;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 new class extends Component {
-    public $users = [];
+    use WithPagination;
+
     public $search = '';
     public $perPage = 10;
+    public $sortBy = 'name';
+    public $sortDirection = 'asc';
+    public $showCreateModal = false;
+    public $showEditModal = false;
+    public $selectedUserId = null;
+
+    public $name = '';
+    public $email = '';
+    public $role = 'user';
+
+    protected $rules = [
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'role' => 'required|in:admin,user',
+    ];
+
+    protected $listeners = ['refreshComponent' => '$refresh'];
 
     public function mount(): void
     {
-        $this->loadUsers();
+        // Component is ready, computed property will handle data
     }
 
-    public function loadUsers(): void
+    #[Computed]
+    public function users()
     {
-        // Mock data - replace with actual database query
-        $this->users = [
-            ['id' => 1, 'name' => 'John Doe', 'email' => 'john@example.com', 'role' => 'Admin', 'created_at' => '2024-01-15'],
-            ['id' => 2, 'name' => 'Jane Smith', 'email' => 'jane@example.com', 'role' => 'User', 'created_at' => '2024-01-20'],
-            ['id' => 3, 'name' => 'Bob Johnson', 'email' => 'bob@example.com', 'role' => 'User', 'created_at' => '2024-02-01'],
-        ];
+        $query = User::query();
+
+        if ($this->search) {
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                  ->orWhere('email', 'like', '%' . $this->search . '%');
+            });
+        }
+
+        $query->orderBy($this->sortBy, $this->sortDirection);
+
+        return $query->paginate($this->perPage);
     }
 
-    public function deleteUser($userId): void
+    public function sort($column): void
     {
-        // Implement user deletion logic
-        $this->loadUsers();
+        if ($this->sortBy === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $column;
+            $this->sortDirection = 'asc';
+        }
     }
-};
-?>
+
+    public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
+    public function createUser()
+    {
+        $this->validate();
+
+        User::create([
+            'name' => $this->name,
+            'email' => $this->email,
+            'password' => bcrypt('password'),
+            'role' => $this->role,
+        ]);
+
+        $this->reset(['name', 'email', 'role', 'showCreateModal']);
+        $this->dispatch('user-created');
+    }
+
+    public function editUser($userId)
+    {
+        $this->selectedUserId = $userId;
+        $user = User::find($userId);
+        
+        if ($user) {
+            $this->name = $user->name;
+            $this->email = $user->email;
+            $this->role = $user->role ?? 'user';
+        }
+        
+        $this->showEditModal = true;
+    }
+
+    public function updateUser()
+    {
+        $this->validate([
+            'email' => 'required|email|unique:users,email,' . $this->selectedUserId,
+        ]);
+
+        $user = User::find($this->selectedUserId);
+        if ($user) {
+            $user->update([
+                'name' => $this->name,
+                'email' => $this->email,
+                'role' => $this->role,
+            ]);
+        }
+
+        $this->reset(['selectedUserId', 'name', 'email', 'role', 'showEditModal']);
+        $this->dispatch('user-updated');
+    }
+
+    public function deleteUser($userId)
+    {
+        User::find($userId)?->delete();
+        $this->dispatch('user-deleted');
+    }
+
+    public function paginationView(): string
+    {
+        return 'livewire.pagination-links';
+    }
+}; ?>
 
 <flux:heading>User Management</flux:heading>
 
-<!-- Search and Actions -->
-<div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6 mb-6">
-    <div class="flex items-center justify-between">
-        <input 
-            type="text" 
-            wire:model.live="search" 
-            placeholder="Search users..." 
-            class="max-w-xs px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        
-        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center">
-            <flux:icon name="layout-grid" class="w-4 h-4 mr-2" />
-            Add User
-        </button>
-    </div>
+<div class="flex justify-between items-center mb-6">
+    <div></div>
+    <flux:button wire:click="$toggle('showCreateModal')">
+        <flux:icon.plus class="w-4 h-4 mr-2" />
+        Add New User
+    </flux:button>
 </div>
 
+<!-- Search and Filter -->
+<flux:card class="mb-6">
+    <flux:card.content>
+        <flux:grid>
+            <flux:textbox 
+                wire:model.live="search" 
+                placeholder="Search users..." 
+                label="Search"
+            />
+            <flux:select wire:model.live="perPage" label="Per Page">
+                <flux:select.option value="10">10 per page</flux:select.option>
+                <flux:select.option value="25">25 per page</flux:select.option>
+                <flux:select.option value="50">50 per page</flux:select.option>
+            </flux:select>
+        </flux:grid>
+    </flux:card.content>
+</flux:card>
+
 <!-- Users Table -->
-<div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
-    <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700">
-        <flux:heading>Users</flux:heading>
-        <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">Manage application users</flux:text>
-    </div>
+<flux:table>
+    <flux:table.header>
+        <flux:table.row>
+            <flux:table.heading>
+                <flux:button variant="ghost" size="sm" wire:click="sort('name')">
+                    Name
+                    @if($sortBy === 'name')
+                        <flux:icon.caret-{{ $sortDirection === 'asc' ? 'up' : 'down' }} class="w-4 h-4" />
+                    @endif
+                </flux:button>
+            </flux:table.heading>
+            <flux:table.heading>
+                <flux:button variant="ghost" size="sm" wire:click="sort('email')">
+                    Email
+                    @if($sortBy === 'email')
+                        <flux:icon.caret-{{ $sortDirection === 'asc' ? 'up' : 'down' }} class="w-4 h-4" />
+                    @endif
+                </flux:button>
+            </flux:table.heading>
+            <flux:table.heading>Role</flux:table.heading>
+            <flux:table.heading>
+                <flux:button variant="ghost" size="sm" wire:click="sort('created_at')">
+                    Created
+                    @if($sortBy === 'created_at')
+                        <flux:icon.caret-{{ $sortDirection === 'asc' ? 'up' : 'down' }} class="w-4 h-4" />
+                    @endif
+                </flux:button>
+            </flux:table.heading>
+            <flux:table.heading>Actions</flux:table.heading>
+        </flux:table.row>
+    </flux:table.header>
     
-    <div class="overflow-x-auto">
-        <table class="w-full">
-            <thead class="bg-zinc-50 dark:bg-zinc-700">
-                <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Email</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Role</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Created</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
-                @foreach($users as $user)
-                    <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $user['name'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">{{ $user['email'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
-                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $user['role'] === 'Admin' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-zinc-100 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-300' }}">
-                                {{ $user['role'] }}
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">{{ $user['created_at'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
-                            <div class="flex space-x-2">
-                                <button class="p-2 border border-zinc-300 dark:border-zinc-600 rounded hover:bg-zinc-50 dark:hover:bg-zinc-700">
-                                    <flux:icon name="folder-git-2" class="w-4 h-4" />
-                                </button>
-                                <button 
-                                    class="p-2 border border-zinc-300 dark:border-zinc-600 rounded hover:bg-zinc-50 dark:hover:bg-zinc-700"
-                                    wire:click="deleteUser({{ $user['id'] }})"
-                                >
-                                    <flux:icon name="book-open-text" class="w-4 h-4" />
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+    <flux:table.body>
+        @forelse($this->users as $user)
+            <flux:table.row>
+                <flux:table.cell>
+                    <div class="flex items-center">
+                        <flux:avatar>{{ substr($user->name, 0, 1) }}</flux:avatar>
+                        <div class="ml-4">
+                            <flux:text weight="medium">{{ $user->name }}</flux:text>
+                        </div>
+                    </div>
+                </flux:table.cell>
+                <flux:table.cell>
+                    <flux:text>{{ $user->email }}</flux:text>
+                </flux:table.cell>
+                <flux:table.cell>
+                    <flux:badge variant="{{ $user->role === 'admin' ? 'primary' : 'success' }}">
+                        {{ $user->role ?? 'user' }}
+                    </flux:badge>
+                </flux:table.cell>
+                <flux:table.cell>
+                    <flux:text size="sm" color="gray">{{ $user->created_at->format('Y-m-d') }}</flux:text>
+                </flux:table.cell>
+                <flux:table.cell>
+                    <flux:button variant="ghost" size="sm" wire:click="editUser({{ $user->id }})">
+                        <flux:icon.pencil class="w-4 h-4" />
+                    </flux:button>
+                    <flux:button variant="ghost" size="sm" wire:click="deleteUser({{ $user->id }})" class="text-red-600">
+                        <flux:icon.trash class="w-4 h-4" />
+                    </flux:button>
+                </flux:table.cell>
+            </flux:table.row>
+        @empty
+            <flux:table.row>
+                <flux:table.cell colspan="5" class="text-center">
+                    <flux:text color="gray">No users found</flux:text>
+                </flux:table.cell>
+            </flux:table.row>
+        @endforelse
+    </flux:table.body>
+</flux:table>
+
+<!-- Pagination -->
+@if($this->users->hasPages())
+    <div class="mt-4">
+        {{ $this->users->links() }}
     </div>
-</div>
+@endif
+
+<!-- Create User Modal -->
+@if($showCreateModal)
+    <flux:modal wire:model="showCreateModal">
+        <flux:modal.heading>Create New User</flux:modal.heading>
+        
+        <flux:modal.content>
+            <flux:form wire:submit="createUser">
+                <flux:textbox 
+                    wire:model="name" 
+                    label="Name" 
+                    required
+                />
+                @error('name') <flux:error>{{ $message }}</flux:error> @enderror
+                
+                <flux:textbox 
+                    wire:model="email" 
+                    type="email" 
+                    label="Email" 
+                    required
+                />
+                @error('email') <flux:error>{{ $message }}</flux:error> @enderror
+                
+                <flux:select wire:model="role" label="Role" required>
+                    <flux:select.option value="user">User</flux:select.option>
+                    <flux:select.option value="admin">Admin</flux:select.option>
+                </flux:select>
+                @error('role') <flux:error>{{ $message }}</flux:error> @enderror
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <flux:button variant="ghost" wire:click="$toggle('showCreateModal')">
+                        Cancel
+                    </flux:button>
+                    <flux:button type="submit">
+                        Create User
+                    </flux:button>
+                </div>
+            </flux:form>
+        </flux:modal.content>
+    </flux:modal>
+@endif
+
+<!-- Edit User Modal -->
+@if($showEditModal)
+    <flux:modal wire:model="showEditModal">
+        <flux:modal.heading>Edit User</flux:modal.heading>
+        
+        <flux:modal.content>
+            <flux:form wire:submit="updateUser">
+                <flux:textbox 
+                    wire:model="name" 
+                    label="Name" 
+                    required
+                />
+                
+                <flux:textbox 
+                    wire:model="email" 
+                    type="email" 
+                    label="Email" 
+                    required
+                />
+                
+                <flux:select wire:model="role" label="Role" required>
+                    <flux:select.option value="user">User</flux:select.option>
+                    <flux:select.option value="admin">Admin</flux:select.option>
+                </flux:select>
+                
+                <div class="flex justify-end space-x-3 mt-6">
+                    <flux:button variant="ghost" wire:click="$toggle('showEditModal')">
+                        Cancel
+                    </flux:button>
+                    <flux:button type="submit">
+                        Update User
+                    </flux:button>
+                </div>
+            </flux:form>
+        </flux:modal.content>
+    </flux:modal>
+@endif
