@@ -15,10 +15,9 @@ A modular Laravel package that adds Ladwire components to fresh Laravel projects
 ## Requirements
 
 - PHP 8.2+
-- Laravel 12.0+
-- Livewire 4.0+
-- Flux UI 2.12+
-- Laravel Fortify 1.30+
+- Laravel 11.0+ / 12.0+
+- Livewire 3.0+ / 4.0+
+- Flux UI 1.0+ / 2.0+
 
 ## Installation
 
@@ -39,7 +38,7 @@ composer require ladbu/laravel-ladwire-module:1.0.8
 
 ### Version Information
 
-- **v1.1.0+** - Laravel Livewire starter kit structure (recommended)
+- **v1.1.0+** - Current architecture with local modules and clean installer
 - **v1.0.8** - Original Ladwire structure
 
 ### For Fresh Laravel Projects
@@ -51,12 +50,12 @@ For fresh Laravel projects, you can use the installer command to set up everythi
 composer require ladbu/laravel-ladwire-module
 
 # Install specific modules
-php artisan ladwire:install --dashboard
-php artisan ladwire:install --user-management
-php artisan ladwire:install --settings
+php artisan ladwire:install-clean --dashboard
+php artisan ladwire:install-clean --user-management
+php artisan ladwire:install-clean --settings
 
 # Install all modules
-php artisan ladwire:install
+php artisan ladwire:install-clean
 ```
 
 ### Post-Installation Steps
@@ -85,7 +84,8 @@ The installer command creates files following the Laravel Livewire starter kit s
 app/
 ├── Http/
 │   └── Controllers/
-│       └── DashboardController.php
+│       ├── DashboardController.php
+│       └── SettingsController.php
 ├── Livewire/
 │   └── Actions/
 │       └── Logout.php
@@ -123,6 +123,21 @@ resources/
 routes/
 ├── web.php
 └── settings.php
+
+Package Templates (source):
+src/
+├── Templates/
+│   ├── Controllers/
+│   │   ├── DashboardController.php
+│   │   ├── SettingsController.php
+│   │   └── UserManagementController.php
+│   └── Views/
+│       ├── dashboard.blade.php
+│       ├── settings.blade.php
+│       └── user-management.blade.php
+└── Console/
+    └── Commands/
+        └── InstallLadwireModuleClean.php
 ```
 
 #### Example usage in your fresh project:
@@ -279,7 +294,13 @@ new class extends Component {
 
 ### Module Discovery
 
-The main package automatically discovers and registers any installed modules. If you install a module separately, it will be automatically available without additional configuration.
+The main package automatically discovers and registers available modules from the local `modules/` directory. The `LaravelLadwireModuleServiceProvider` checks for the presence of service providers:
+
+- `Ladbu\LaravelLadwireDashboard\DashboardServiceProvider`
+- `Ladbu\LaravelLadwireUserManagement\UserManagementServiceProvider`
+- `Ladbu\LaravelLadwireSettings\SettingsServiceProvider`
+
+The installer command copies templates from `src/Templates/` to your Laravel application and registers the routes automatically.
 
 ### Ladwire Components
 
@@ -341,7 +362,7 @@ Comprehensive admin dashboard with:
 - Real-time updates with Livewire
 - Flux UI components
 
-**Package**: `ladbu/laravel-ladwire-dashboard`
+**Module Location**: `modules/dashboard/`
 **Files Generated**:
 - `resources/views/ladwire/dashboard.blade.php` - Dashboard component
 - `app/Http/Controllers/DashboardController.php` - Dashboard controller
@@ -355,7 +376,7 @@ Complete user administration with:
 - Bulk operations support
 - Modal-based forms
 
-**Package**: `ladbu/laravel-ladwire-user-management`
+**Module Location**: `modules/user-management/`
 **Files Generated**:
 - `resources/views/ladwire/user-management.blade.php` - User management component
 
@@ -368,7 +389,7 @@ Application configuration management:
 - Form validation
 - Settings persistence
 
-**Package**: `ladbu/laravel-ladwire-settings`
+**Module Location**: `modules/settings/`
 **Files Generated**:
 - `resources/views/ladwire/settings.blade.php` - Settings component
 
@@ -458,10 +479,9 @@ jobs:
 ## Requirements
 
 - PHP 8.2+
-- Laravel 12.0+
-- Livewire 4.0+
-- Flux UI 2.12+
-- Laravel Fortify 1.30+
+- Laravel 11.0+ / 12.0+
+- Livewire 3.0+ / 4.0+
+- Flux UI 1.0+ / 2.0+
 
 ### Environment Variables
 
@@ -543,12 +563,12 @@ If you encounter any issues or have questions, please open an issue on the GitHu
 
 ## Changelog
 
-### v1.1.0 - Latest (Laravel Livewire Starter Kit Structure)
-- **NEW**: Laravel Livewire starter kit structure support
-- **NEW**: Inline component pattern (⚡ prefix)
-- **NEW**: Controllers following starter kit pattern
-- **UPDATED**: Requirements - Laravel 12.0+, Livewire 4.0+, Flux 2.12+
-- **NEW**: Both traditional and starter kit patterns supported
+### v1.1.0+ - Current Architecture
+- **NEW**: Local module structure in `modules/` directory
+- **NEW**: Clean installer command `ladwire:install-clean`
+- **NEW**: Template system in `src/Templates/`
+- **UPDATED**: Requirements - PHP 8.2+, Laravel 11.0+/12.0+, Livewire 3.0+/4.0+, Flux 1.0+/2.0+
+- **NEW**: Service provider-based module discovery
 - **NEW**: Comprehensive documentation updates
 - **NEW**: Proper view structure with layouts.app
 
