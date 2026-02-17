@@ -27,8 +27,20 @@ A modular Laravel package that adds Ladwire components to fresh Laravel projects
 If you're developing this package or want to use it in an existing project:
 
 ```bash
+# Install latest version (v1.1.0+ with starter kit structure)
 composer require ladbu/laravel-ladwire-module
+
+# Install specific version
+composer require ladbu/laravel-ladwire-module:1.1.0
+
+# Install older version (original structure)
+composer require ladbu/laravel-ladwire-module:1.0.8
 ```
+
+### Version Information
+
+- **v1.1.0+** - Laravel Livewire starter kit structure (recommended)
+- **v1.0.8** - Original Ladwire structure
 
 ### For Fresh Laravel Projects
 
@@ -527,15 +539,19 @@ If you encounter any issues or have questions, please open an issue on the GitHu
 
 ## Changelog
 
-### v1.0.0
-- Initial release
-- **NEW**: Modular architecture allowing selective installation
-- Dashboard component with statistics
-- User management with CRUD operations
-- Settings panel with configuration options
-- Flux UI integration for modern, accessible components
-- Ladwire integration
-- Auto-discovery of installed modules
+### v1.1.0 - Latest (Laravel Livewire Starter Kit Structure)
+- **NEW**: Laravel Livewire starter kit structure support
+- **NEW**: Inline component pattern (⚡ prefix)
+- **NEW**: Controllers following starter kit pattern
+- **UPDATED**: Requirements - Laravel 12.0+, Livewire 4.0+, Flux 2.12+
+- **NEW**: Both traditional and starter kit patterns supported
+- **NEW**: Comprehensive documentation updates
+- **NEW**: Proper view structure with layouts.app
+
+### v1.0.8 - Original Structure
+- Initial release with original Ladwire structure
+- Laravel 11.0+ / 12.0+, Livewire 3.0+, Flux 1.0+
+- Traditional component pattern only
 
 ## Roadmap
 
