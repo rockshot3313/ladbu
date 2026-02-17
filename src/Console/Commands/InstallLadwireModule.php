@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class InstallLadwireModule extends Command
 {
-    protected $signature = 'ladwire:install {--dashboard?} {--user-management?} {--settings?}';
+    protected $signature = 'ladwire:install {--dashboard} {--user-management} {--settings}';
     protected $description = 'Install Ladwire components into a fresh Laravel project';
 
     public function handle()
