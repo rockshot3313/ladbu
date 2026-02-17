@@ -46,6 +46,10 @@ class SettingsServiceProvider extends ServiceProvider
      */
     protected function registerLadwireComponents(): void
     {
+        // Register traditional Livewire component
         Livewire::component('laravel-ladwire-settings::settings', \Ladbu\LaravelLadwireSettings\Http\Livewire\Settings::class);
+        
+        // Register inline component following starter kit pattern
+        Livewire::component('pages::settings', \Ladbu\LaravelLadwireSettings\Http\Livewire\Settings::class);
     }
 }

@@ -46,6 +46,10 @@ class UserManagementServiceProvider extends ServiceProvider
      */
     protected function registerLadwireComponents(): void
     {
+        // Register traditional Livewire component
         Livewire::component('laravel-ladwire-user-management::user-management', \Ladbu\LaravelLadwireUserManagement\Http\Livewire\UserManagement::class);
+        
+        // Register inline component following starter kit pattern
+        Livewire::component('pages::user-management', \Ladbu\LaravelLadwireUserManagement\Http\Livewire\UserManagement::class);
     }
 }
