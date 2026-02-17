@@ -85,7 +85,7 @@ class InstallLadwireModuleClean extends Command
         
         // Create the component file manually with correct Livewire import
         $componentPath = resource_path("views/pages/{$module}/⚡{$componentName}.blade.php");
-        $templatePath = base_path("modules/{$module}/resources/views/pages/⚡{$componentName}.blade.php");
+        $templatePath = __DIR__ . "/../../../modules/{$module}/resources/views/pages/⚡{$componentName}.blade.php";
         
         if (File::exists($templatePath)) {
             $content = File::get($templatePath);
