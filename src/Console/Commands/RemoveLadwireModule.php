@@ -129,8 +129,11 @@ class RemoveLadwireModule extends Command
             $routePath = $this->getRoutePath($module);
             $controllerClass = $this->getControllerClass($module);
             
+            // Escape the controller class for regex
+            $escapedControllerClass = preg_quote($controllerClass, '/');
+            
             // Remove the route line
-            $pattern = "/Route::get\(['\"]{$routePath}['\"],\s*{$controllerClass}::class\)\s*->name\(['\"][^'\"]*['\"]\);?/";
+            $pattern = "/Route::get\(['\"]{$routePath}['\"],\s*{$escapedControllerClass}::class\)\s*->name\(['\"][^'\"]*['\"]\);?/";
             $routeContent = preg_replace($pattern, '', $routeContent);
             
             // Remove empty lines
