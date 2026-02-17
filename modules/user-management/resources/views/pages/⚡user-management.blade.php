@@ -33,70 +33,67 @@ new class extends Component {
 <flux:heading>User Management</flux:heading>
 
 <!-- Search and Actions -->
-<flux:card class="mb-6">
-    <flux:card.content>
-        <div class="flex items-center justify-between">
-            <flux:input 
-                wire:model.live="search" 
-                placeholder="Search users..." 
-                class="max-w-xs"
-            />
-            
-            <flux:button variant="primary">
-                <flux:icon.plus class="w-4 h-4 mr-2" />
-                Add User
-            </flux:button>
-        </div>
-    </flux:card.content>
-</flux:card>
+<div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6 mb-6">
+    <div class="flex items-center justify-between">
+        <input 
+            type="text" 
+            wire:model.live="search" 
+            placeholder="Search users..." 
+            class="max-w-xs px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        
+        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center">
+            <flux:icon name="layout-grid" class="w-4 h-4 mr-2" />
+            Add User
+        </button>
+    </div>
+</div>
 
 <!-- Users Table -->
-<flux:card>
-    <flux:card.header>
-        <flux:card.title>Users</flux:card.title>
-        <flux:card.description>Manage application users</flux:card.description>
-    </flux:card.header>
+<div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+    <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700">
+        <flux:heading>Users</flux:heading>
+        <flux:text class="text-sm text-zinc-600 dark:text-zinc-400">Manage application users</flux:text>
+    </div>
     
-    <flux:card.content>
-        <flux:table>
-            <flux:table.header>
-                <flux:table.row>
-                    <flux:table.cell>Name</flux:table.cell>
-                    <flux:table.cell>Email</flux:table.cell>
-                    <flux:table.cell>Role</flux:table.cell>
-                    <flux:table.cell>Created</flux:table.cell>
-                    <flux:table.cell>Actions</flux:table.cell>
-                </flux:table.row>
-            </flux:table.header>
-            
-            <flux:table.body>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-zinc-50 dark:bg-zinc-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Created</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white dark:bg-zinc-800 divide-y divide-zinc-200 dark:divide-zinc-700">
                 @foreach($users as $user)
-                    <flux:table.row>
-                        <flux:table.cell>{{ $user['name'] }}</flux:table.cell>
-                        <flux:table.cell>{{ $user['email'] }}</flux:table.cell>
-                        <flux:table.cell>
-                            <flux:badge variant="{{ $user['role'] === 'Admin' ? 'primary' : 'secondary' }}">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-zinc-900 dark:text-zinc-100">{{ $user['name'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">{{ $user['email'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full {{ $user['role'] === 'Admin' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-zinc-100 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-300' }}">
                                 {{ $user['role'] }}
-                            </flux:badge>
-                        </flux:table.cell>
-                        <flux:table.cell>{{ $user['created_at'] }}</flux:table.cell>
-                        <flux:table.cell>
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">{{ $user['created_at'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
                             <div class="flex space-x-2">
-                                <flux:button size="sm" variant="outline">
-                                    <flux:icon.edit class="w-4 h-4" />
-                                </flux:button>
-                                <flux:button 
-                                    size="sm" 
-                                    variant="outline" 
+                                <button class="p-2 border border-zinc-300 dark:border-zinc-600 rounded hover:bg-zinc-50 dark:hover:bg-zinc-700">
+                                    <flux:icon name="folder-git-2" class="w-4 h-4" />
+                                </button>
+                                <button 
+                                    class="p-2 border border-zinc-300 dark:border-zinc-600 rounded hover:bg-zinc-50 dark:hover:bg-zinc-700"
                                     wire:click="deleteUser({{ $user['id'] }})"
                                 >
-                                    <flux:icon.trash class="w-4 h-4" />
-                                </flux:button>
+                                    <flux:icon name="book-open-text" class="w-4 h-4" />
+                                </button>
                             </div>
-                        </flux:table.cell>
-                    </flux:table.row>
+                        </td>
+                    </tr>
                 @endforeach
-            </flux:table.body>
-        </flux:table>
-    </flux:card.content>
-</flux:card>
+            </tbody>
+        </table>
+    </div>
+</div>

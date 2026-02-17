@@ -1,79 +1,78 @@
 <flux:heading>Dashboard</flux:heading>
 
 <!-- Stats Grid -->
-<flux:grid class="mb-8">
-    <flux:card>
-        <flux:card.content>
-            <div class="flex items-center">
-                <flux:icon.users class="w-6 h-6 text-blue-600" />
-                <div class="ml-4">
-                    <flux:text size="sm" color="gray">Total Users</flux:text>
-                    <flux:text size="2xl" weight="semibold">{{ $stats['total_users'] }}</flux:text>
-                </div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                <flux:icon name="layout-grid" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
             </div>
-        </flux:card.content>
-    </flux:card>
+            <div class="ml-4">
+                <div class="text-sm text-zinc-600 dark:text-zinc-400">Total Users</div>
+                <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $stats['total_users'] }}</div>
+            </div>
+        </div>
+    </div>
 
-    <flux:card>
-        <flux:card.content>
-            <div class="flex items-center">
-                <flux:icon.check-circle class="w-6 h-6 text-green-600" />
-                <div class="ml-4">
-                    <flux:text size="sm" color="gray">Active Users</flux:text>
-                    <flux:text size="2xl" weight="semibold">{{ $stats['active_users'] }}</flux:text>
-                </div>
+    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                <flux:icon name="chevrons-up-down" class="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
-        </flux:card.content>
-    </flux:card>
+            <div class="ml-4">
+                <div class="text-sm text-zinc-600 dark:text-zinc-400">Active Users</div>
+                <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $stats['active_users'] }}</div>
+            </div>
+        </div>
+    </div>
 
-    <flux:card>
-        <flux:card.content>
-            <div class="flex items-center">
-                <flux:icon.document-text class="w-6 h-6 text-purple-600" />
-                <div class="ml-4">
-                    <flux:text size="sm" color="gray">Total Posts</flux:text>
-                    <flux:text size="2xl" weight="semibold">{{ $stats['total_posts'] }}</flux:text>
-                </div>
+    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                <flux:icon name="folder-git-2" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
-        </flux:card.content>
-    </flux:card>
+            <div class="ml-4">
+                <div class="text-sm text-zinc-600 dark:text-zinc-400">Total Posts</div>
+                <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $stats['total_posts'] }}</div>
+            </div>
+        </div>
+    </div>
 
-    <flux:card>
-        <flux:card.content>
-            <div class="flex items-center">
-                <flux:icon.clock class="w-6 h-6 text-orange-600" />
-                <div class="ml-4">
-                    <flux:text size="sm" color="gray">New Posts Today</flux:text>
-                    <flux:text size="2xl" weight="semibold">{{ $stats['new_posts_today'] }}</flux:text>
-                </div>
+    <div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg p-6">
+        <div class="flex items-center">
+            <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center">
+                <flux:icon name="book-open-text" class="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
-        </flux:card.content>
-    </flux:card>
-</flux:grid>
+            <div class="ml-4">
+                <div class="text-sm text-zinc-600 dark:text-zinc-400">New Posts Today</div>
+                <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">{{ $stats['new_posts_today'] }}</div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Recent Activity -->
-<flux:card>
-    <flux:card.header>
-        <flux:card.title>Recent Activity</flux:card.title>
-    </flux:card.header>
+<div class="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg">
+    <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-700">
+        <flux:heading>Recent Activity</flux:heading>
+    </div>
     
-    <flux:card.content>
-        <flux:separator />
-        
-        @foreach($recentActivity as $activity)
-            <div class="flex items-center justify-between py-4">
-                <div class="flex items-center">
-                    <flux:avatar>{{ substr($activity['user'], 0, 1) }}</flux:avatar>
-                    <div class="ml-4">
-                        <flux:text weight="medium">{{ $activity['user'] }}</flux:text>
-                        <flux:text size="sm" color="gray">{{ $activity['action'] }}</flux:text>
+    <div class="p-6">
+        <div class="space-y-4">
+            @foreach($recentActivity as $activity)
+                <div class="flex items-center justify-between py-3 {{ !$loop->last ? 'border-b border-zinc-200 dark:border-zinc-700' : '' }}">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-700 rounded-full flex items-center justify-center">
+                            <span class="text-sm font-medium text-zinc-600 dark:text-zinc-300">{{ substr($activity['user'], 0, 1) }}{{ substr($activity['user'], strpos($activity['user'], ' ') + 1, 1) }}</span>
+                        </div>
+                        <div class="ml-4">
+                            <div class="font-medium text-zinc-900 dark:text-zinc-100">{{ $activity['user'] }}</div>
+                            <div class="text-sm text-zinc-600 dark:text-zinc-400">{{ $activity['action'] }}</div>
+                        </div>
                     </div>
+                    <div class="text-sm text-zinc-500 dark:text-zinc-400">{{ $activity['time'] }}</div>
                 </div>
-                <flux:text size="sm" color="gray">{{ $activity['time'] }}</flux:text>
-            </div>
-            @if(!$loop->last)
-                <flux:separator />
-            @endif
-        @endforeach
-    </flux:card.content>
-</flux:card>
+            @endforeach
+        </div>
+    </div>
+</div>
