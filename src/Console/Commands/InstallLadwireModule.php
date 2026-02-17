@@ -80,6 +80,9 @@ class InstallLadwireModule extends Command
         // Create view
         $this->createView('dashboard');
         
+        // Add to sidebar
+        $this->addSidebarItem('dashboard');
+        
         $this->info('✅ Dashboard module installed');
     }
 
@@ -99,6 +102,9 @@ class InstallLadwireModule extends Command
         // Create view
         $this->createView('user-management');
         
+        // Add to sidebar
+        $this->addSidebarItem('user-management');
+        
         $this->info('✅ User Management module installed');
     }
 
@@ -117,6 +123,9 @@ class InstallLadwireModule extends Command
         
         // Create view
         $this->createView('settings');
+        
+        // Add to sidebar
+        $this->addSidebarItem('settings');
         
         $this->info('✅ Settings module installed');
     }
@@ -600,5 +609,68 @@ BLADE;
     <flux:text>This is the {$viewName} component. Customize this view to add your functionality.</flux:text>
 </div>
 BLADE;
+    }
+
+    protected function addSidebarItem($module)
+    {
+        $sidebarPath = resource_path('views/layouts/app/sidebar.blade.php');
+        
+        if (!File::exists($sidebarPath)) {
+            $this->warn("Sidebar file not found: {$sidebarPath}");
+            return;
+        }
+
+        $sidebarContent = File::get($sidebarPath);
+        
+        $moduleInfo = $this->getModuleInfo($module);
+        $sidebarItem = $this->getSidebarItem($moduleInfo);
+        
+        // Find the position to insert the sidebar item (after the dashboard item)
+        $pattern = '/(<flux:sidebar\.item[^>]*>Dashboard<\/flux:sidebar\.item>)/';
+        
+        if (preg_match($pattern, $sidebarContent)) {
+            $newSidebarContent = preg_replace($pattern, '$1' . "\n                    " . $sidebarItem, $sidebarContent);
+            File::put($sidebarPath, $newSidebarContent);
+            $this->info("Added sidebar item for {$moduleInfo['name']}");
+        } else {
+            // If dashboard item not found, add to the Platform group
+            $platformGroupPattern = '/(<flux:sidebar\.group[^>]*heading="[^"]*Platform[^"]*"[^>]*>)/';
+            if (preg_match($platformGroupPattern, $sidebarContent)) {
+                $newSidebarContent = preg_replace($platformGroupPattern, '$1' . "\n                    " . $sidebarItem, $sidebarContent);
+                File::put($sidebarPath, $newSidebarContent);
+                $this->info("Added sidebar item for {$moduleInfo['name']}");
+            }
+        }
+    }
+
+    protected function getModuleInfo($module)
+    {
+        return match($module) {
+            'dashboard' => [
+                'name' => 'Dashboard',
+                'route' => 'dashboard',
+                'icon' => 'home',
+            ],
+            'user-management' => [
+                'name' => 'User Management',
+                'route' => 'user-management',
+                'icon' => 'users',
+            ],
+            'settings' => [
+                'name' => 'Settings',
+                'route' => 'settings',
+                'icon' => 'cog',
+            ],
+            default => [
+                'name' => ucfirst($module),
+                'route' => $module,
+                'icon' => 'folder-git-2',
+            ]
+        };
+    }
+
+    protected function getSidebarItem($moduleInfo)
+    {
+        return "<flux:sidebar.item icon=\"{$moduleInfo['icon']}\" :href=\"route('{$moduleInfo['route']}')\" :current=\"request()->routeIs('{$moduleInfo['route']}')\" wire:navigate>\n                        {{ __('{$moduleInfo['name']}') }}\n                    </flux:sidebar.item>";
     }
 }

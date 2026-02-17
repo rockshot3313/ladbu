@@ -29,6 +29,7 @@ class RemoveLadwireModule extends Command
         $this->removeLivewireComponent($module);
         $this->removeViews($module);
         $this->removeRoute($module);
+        $this->removeSidebarItem($module);
 
         $this->info("✅ {$this->getModuleName($module)} module removed");
         $this->info("✅ Ladwire Module removal complete!");
@@ -142,5 +143,54 @@ class RemoveLadwireModule extends Command
             File::put($webRoutesPath, $routeContent);
             $this->info("Removed route: {$routePath}");
         }
+    }
+
+    protected function removeSidebarItem($module)
+    {
+        $sidebarPath = resource_path('views/layouts/app/sidebar.blade.php');
+        
+        if (!File::exists($sidebarPath)) {
+            $this->warn("Sidebar file not found: {$sidebarPath}");
+            return;
+        }
+
+        $sidebarContent = File::get($sidebarPath);
+        $moduleInfo = $this->getModuleInfo($module);
+        
+        // Remove the sidebar item
+        $pattern = '/<flux:sidebar\.item[^>]*icon="' . preg_quote($moduleInfo['icon'], '/') . '"[^>]*>.*?<\/flux:sidebar\.item>/s';
+        $newSidebarContent = preg_replace($pattern, '', $sidebarContent);
+        
+        // Remove empty lines
+        $newSidebarContent = preg_replace("/\n\s*\n\s*\n/", "\n\n", $newSidebarContent);
+        
+        File::put($sidebarPath, $newSidebarContent);
+        $this->info("Removed sidebar item for {$moduleInfo['name']}");
+    }
+
+    protected function getModuleInfo($module)
+    {
+        return match($module) {
+            'dashboard' => [
+                'name' => 'Dashboard',
+                'route' => 'dashboard',
+                'icon' => 'home',
+            ],
+            'user-management' => [
+                'name' => 'User Management',
+                'route' => 'user-management',
+                'icon' => 'users',
+            ],
+            'settings' => [
+                'name' => 'Settings',
+                'route' => 'settings',
+                'icon' => 'cog',
+            ],
+            default => [
+                'name' => ucfirst($module),
+                'route' => $module,
+                'icon' => 'folder-git-2',
+            ]
+        };
     }
 }
