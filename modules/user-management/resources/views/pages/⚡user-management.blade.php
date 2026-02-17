@@ -1,6 +1,6 @@
 <?php
 use App\Models\User;
-use Livewire\Volt\Component;
+use Livewire\Component;
 use Livewire\WithPagination;
 use Flux\Flux;
 
@@ -21,13 +21,13 @@ new class extends Component {
         Flux::toast('User deleted successfully.');
     }
 
-    public function with(): array
+    public function render()
     {
-        return [
+        return view('livewire.pages.user-management.user-management', [
             'users' => User::where('name', 'like', "%{$this->search}%")
                 ->orWhere('email', 'like', "%{$this->search}%")
                 ->paginate(10),
-        ];
+        ]);
     }
 }; ?>
 

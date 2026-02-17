@@ -21,11 +21,18 @@ new class extends Component {
             ['user' => 'Bob Johnson', 'action' => 'Deleted comment', 'time' => '10 minutes ago'],
         ];
     }
-};
-?>
 
-<x-layouts::app :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl">
+    public function render()
+    {
+        return view('livewire.pages.dashboard.dashboard');
+    }
+}; ?>
+
+<div class="p-6">
+    <flux:heading size="xl">Dashboard</flux:heading>
+    <flux:subheading>Overview of your application statistics and recent activity.</flux:subheading>
+    
+    <div class="flex h-full w-full flex-1 flex-col gap-4 rounded-xl mt-6">
         <div class="grid auto-rows-min gap-4 md:grid-cols-2 lg:grid-cols-4">
             <div class="relative aspect-video overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
                 <div class="absolute inset-0 flex items-center justify-center">
@@ -82,4 +89,4 @@ new class extends Component {
             </div>
         </div>
     </div>
-</x-layouts::app>
+</div>

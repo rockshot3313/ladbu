@@ -39,8 +39,12 @@ new class extends Component {
         // Implement settings save logic
         $this->dispatch('settings-saved');
     }
-};
-?>
+
+    public function render()
+    {
+        return view('livewire.pages.settings.settings');
+    }
+}; ?>
 
 <flux:heading>Application Settings</flux:heading>
 

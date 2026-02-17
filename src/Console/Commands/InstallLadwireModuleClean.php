@@ -75,25 +75,25 @@ class InstallLadwireModuleClean extends Command
 
     protected function createLivewireComponent($module)
     {
-        $viewName = $this->getComponentViewName($module);
+        $componentName = $this->getComponentName($module);
         
-        // Create single-file Livewire component in pages directory
-        $componentPath = resource_path("views/pages/{$module}/⚡{$viewName}.blade.php");
+        // Generate Livewire component using artisan command with pages:: prefix (Livewire v4 syntax)
+        Artisan::call('make:livewire', [
+            'name' => "pages::{$module}.{$componentName}",
+        ]);
         
-        // Ensure pages directory exists
-        $pagesDir = resource_path("views/pages/{$module}");
-        if (!File::exists($pagesDir)) {
-            File::makeDirectory($pagesDir, 0755, true);
-        }
+        $this->info("Created Livewire component: pages::{$module}.{$componentName}");
         
-        $templatePath = base_path("vendor/ladbu/laravel-ladwire-module/modules/{$module}/resources/views/pages/⚡{$module}.blade.php");
+        // Update the generated component with our template content
+        $componentPath = resource_path("views/pages/{$module}/⚡{$componentName}.blade.php");
+        $templatePath = base_path("modules/{$module}/resources/views/pages/⚡{$componentName}.blade.php");
         
         if (File::exists($templatePath)) {
             $content = File::get($templatePath);
             File::put($componentPath, $content);
-            $this->info("Created Livewire component: {$componentPath}");
+            $this->info("Updated component with template content: {$componentPath}");
         } else {
-            $this->error("Component template not found: {$templatePath}");
+            $this->warn("Template not found: {$templatePath}");
         }
     }
 
@@ -104,13 +104,24 @@ class InstallLadwireModuleClean extends Command
         if (File::exists($webRoutesPath)) {
             $routeContent = File::get($webRoutesPath);
             
-            // Add route with unique identifiers pointing to Volt component
-            $routeLine = "\n// Ladwire Module: {$module}\nRoute::livewire('/{$module}', 'pages::{$module}.⚡{$this->getComponentViewName($module)}')\n    ->middleware(['auth', 'verified'])\n    ->name('{$module}'); // END Ladwire Module: {$module}";
+            // Add route with unique identifiers pointing to Livewire v4 component
+            $componentName = $this->getComponentName($module);
+            $routeLine = "\n// Ladwire Module: {$module}\nRoute::livewire('/{$module}', 'pages::{$module}.{$componentName}')\n    ->middleware(['auth', 'verified'])\n    ->name('{$module}'); // END Ladwire Module: {$module}";
             $routeContent .= $routeLine;
             
             File::put($webRoutesPath, $routeContent);
             $this->info("Added route: /{$module}");
         }
+    }
+
+    protected function getComponentName($module)
+    {
+        return match($module) {
+            'user-management' => 'user-management',
+            'dashboard' => 'dashboard',
+            'settings' => 'settings',
+            default => str_replace('-', '', $module),
+        };
     }
 
     protected function addSidebarItem($module)
