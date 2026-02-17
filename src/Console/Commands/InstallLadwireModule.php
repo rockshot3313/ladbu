@@ -450,52 +450,6 @@ BLADE;
         $this->info("Created: {$controllerPath}");
     }
 
-    protected function addRoute($route, $controller)
-    {
-        $routesPath = base_path('routes/web.php');
-        
-        if (!File::exists($routesPath)) {
-            File::put($routesPath, "<?php\n\nuse Illuminate\Support\Facades\Route;\n\n");
-        }
-        
-        // Check if controller is already imported
-        $routesContent = File::get($routesPath);
-        $controllerClass = "App\\Http\\Controllers\\{$controller}";
-        
-        if (!str_contains($routesContent, "use {$controllerClass};")) {
-            // Add import at the top after existing imports
-            $lines = explode("\n", $routesContent);
-            $importLine = "use {$controllerClass};";
-            
-            // Find the last use statement and add after it
-            $lastUseIndex = -1;
-            foreach ($lines as $index => $line) {
-                if (str_starts_with(trim($line), 'use ') && !str_contains($line, 'function')) {
-                    $lastUseIndex = $index;
-                }
-            }
-            
-            if ($lastUseIndex >= 0) {
-                array_splice($lines, $lastUseIndex + 1, 0, $importLine);
-            } else {
-                // Add after the opening PHP tag
-                array_splice($lines, 1, 0, $importLine);
-            }
-            
-            File::put($routesPath, implode("\n", $lines));
-        }
-        
-        // Check if route already exists
-        $routePattern = "Route::get('/{$route}'";
-        if (!str_contains($routesContent, $routePattern)) {
-            $routeContent = "\nRoute::get('/{$route}', {$controller}::class)->name('{$route}');";
-            File::append($routesPath, $routeContent);
-            $this->info("Added route: /{$route}");
-        } else {
-            $this->info("Route already exists: /{$route}");
-        }
-    }
-
     protected function getControllerStub($name, $route)
     {
         if ($name === 'Dashboard') {
@@ -700,68 +654,5 @@ BLADE;
     <flux:text>This is the {$viewName} component. Customize this view to add your functionality.</flux:text>
 </div>
 BLADE;
-    }
-
-    protected function addSidebarItem($module)
-    {
-        $sidebarPath = resource_path('views/layouts/app/sidebar.blade.php');
-        
-        if (!File::exists($sidebarPath)) {
-            $this->warn("Sidebar file not found: {$sidebarPath}");
-            return;
-        }
-
-        $sidebarContent = File::get($sidebarPath);
-        
-        $moduleInfo = $this->getModuleInfo($module);
-        $sidebarItem = $this->getSidebarItem($moduleInfo);
-        
-        // Find the position to insert the sidebar item (after the dashboard item)
-        $pattern = '/(<flux:sidebar\.item[^>]*>Dashboard<\/flux:sidebar\.item>)/';
-        
-        if (preg_match($pattern, $sidebarContent)) {
-            $newSidebarContent = preg_replace($pattern, '$1' . "\n                    " . $sidebarItem, $sidebarContent);
-            File::put($sidebarPath, $newSidebarContent);
-            $this->info("Added sidebar item for {$moduleInfo['name']}");
-        } else {
-            // If dashboard item not found, add to the Platform group
-            $platformGroupPattern = '/(<flux:sidebar\.group[^>]*heading="[^"]*Platform[^"]*"[^>]*>)/';
-            if (preg_match($platformGroupPattern, $sidebarContent)) {
-                $newSidebarContent = preg_replace($platformGroupPattern, '$1' . "\n                    " . $sidebarItem, $sidebarContent);
-                File::put($sidebarPath, $newSidebarContent);
-                $this->info("Added sidebar item for {$moduleInfo['name']}");
-            }
-        }
-    }
-
-    protected function getModuleInfo($module)
-    {
-        return match($module) {
-            'dashboard' => [
-                'name' => 'Dashboard',
-                'route' => 'dashboard',
-                'icon' => 'home',
-            ],
-            'user-management' => [
-                'name' => 'User Management',
-                'route' => 'user-management',
-                'icon' => 'users',
-            ],
-            'settings' => [
-                'name' => 'Settings',
-                'route' => 'settings',
-                'icon' => 'cog',
-            ],
-            default => [
-                'name' => ucfirst($module),
-                'route' => $module,
-                'icon' => 'folder-git-2',
-            ]
-        };
-    }
-
-    protected function getSidebarItem($moduleInfo)
-    {
-        return "<flux:sidebar.item icon=\"{$moduleInfo['icon']}\" :href=\"route('{$moduleInfo['route']}')\" :current=\"request()->routeIs('{$moduleInfo['route']}')\" wire:navigate>\n                        {{ __('{$moduleInfo['name']}') }}\n                    </flux:sidebar.item>";
     }
 }
