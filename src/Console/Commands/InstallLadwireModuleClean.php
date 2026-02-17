@@ -77,21 +77,22 @@ class InstallLadwireModuleClean extends Command
     {
         $componentName = $this->getComponentName($module);
         
-        // Generate Livewire component using artisan command with pages:: prefix (Livewire v4 syntax)
-        Artisan::call('make:livewire', [
-            'name' => "pages::{$module}.{$componentName}",
-        ]);
+        // Create directory if it doesn't exist
+        $componentDir = resource_path("views/pages/{$module}");
+        if (!File::exists($componentDir)) {
+            File::makeDirectory($componentDir, 0755, true);
+        }
         
-        $this->info("Created Livewire component: pages::{$module}.{$componentName}");
-        
-        // Update the generated component with our template content
+        // Create the component file manually with correct Livewire import
         $componentPath = resource_path("views/pages/{$module}/⚡{$componentName}.blade.php");
         $templatePath = base_path("modules/{$module}/resources/views/pages/⚡{$componentName}.blade.php");
         
         if (File::exists($templatePath)) {
             $content = File::get($templatePath);
+            // Ensure we use the correct Livewire Component import
+            $content = str_replace('use Livewire\Volt\Component;', 'use Livewire\Component;', $content);
             File::put($componentPath, $content);
-            $this->info("Updated component with template content: {$componentPath}");
+            $this->info("Created Livewire component: {$componentPath}");
         } else {
             $this->warn("Template not found: {$templatePath}");
         }
