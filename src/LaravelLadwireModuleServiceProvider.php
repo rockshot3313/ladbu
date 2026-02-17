@@ -52,7 +52,6 @@ class LaravelLadwireModuleServiceProvider extends ServiceProvider
         // Register installation command for fresh projects
         if ($this->app->runningInConsole()) {
             $this->commands([
-                InstallLadwireModule::class,
                 InstallLadwireModuleClean::class,
                 MakeLadwireModule::class,
                 RemoveLadwireModule::class,
