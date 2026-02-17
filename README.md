@@ -163,9 +163,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 @extends('layouts.app')
 
 @section('content')
-    <flux:prose>
+    <flux:main>
         <livewire:laravel-ladwire-dashboard::dashboard />
-    </flux:prose>
+    </flux:main>
 @endsection
 ```
 
@@ -202,23 +202,29 @@ You can use the Livewire components following the inline component pattern (⚡ 
 
 ```blade
 <!-- Settings Profile Component (Inline) -->
-<flux:prose>
+<flux:main>
     @livewire('pages::settings.profile')
-</flux:prose>
+</flux:main>
 
 <!-- Settings Password Component (Inline) -->
-<flux:prose>
+<flux:main>
     @livewire('pages::settings.password')
-</flux:prose>
+</flux:main>
 
 <!-- Ladwire Dashboard Component -->
-<livewire:laravel-ladwire-dashboard::dashboard />
+<flux:main>
+    <livewire:laravel-ladwire-dashboard::dashboard />
+</flux:main>
 
 <!-- Ladwire User Management Component -->
-<livewire:laravel-ladwire-user-management::user-management />
+<flux:main>
+    <livewire:laravel-ladwire-user-management::user-management />
+</flux:main>
 
 <!-- Ladwire Settings Component -->
-<livewire:laravel-ladwire-settings::settings />
+<flux:main>
+    <livewire:laravel-ladwire-settings::settings />
+</flux:main>
 ```
 
 ### Inline Component Structure

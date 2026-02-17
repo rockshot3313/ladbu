@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <flux:prose>
+    <flux:main>
         <livewire:laravel-ladwire-dashboard::dashboard />
-    </flux:prose>
+    </flux:main>
 @endsection
