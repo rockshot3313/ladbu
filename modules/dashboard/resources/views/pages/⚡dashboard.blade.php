@@ -22,9 +22,13 @@ new class extends Component {
         ];
     }
 
-    public function render()
+    // Replace render() with with() to pass data to the view
+    public function with(): array
     {
-        return view('livewire.pages.dashboard.dashboard');
+        return [
+            'stats' => $this->stats,
+            'recentActivity' => $this->recentActivity,
+        ];
     }
 }; ?>
 

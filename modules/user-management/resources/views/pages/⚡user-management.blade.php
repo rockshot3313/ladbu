@@ -21,13 +21,14 @@ new class extends Component {
         Flux::toast('User deleted successfully.');
     }
 
-    public function render()
+    // Replace render() with with() to pass data to the view
+    public function with(): array
     {
-        return view('livewire.pages.user-management.user-management', [
+        return [
             'users' => User::where('name', 'like', "%{$this->search}%")
                 ->orWhere('email', 'like', "%{$this->search}%")
                 ->paginate(10),
-        ]);
+        ];
     }
 }; ?>
 

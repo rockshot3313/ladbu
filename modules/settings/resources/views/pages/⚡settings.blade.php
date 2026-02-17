@@ -40,9 +40,15 @@ new class extends Component {
         $this->dispatch('settings-saved');
     }
 
-    public function render()
+    // Replace render() with with() to pass data to the view
+    public function with(): array
     {
-        return view('livewire.pages.settings.settings');
+        return [
+            'siteName' => $this->siteName,
+            'siteDescription' => $this->siteDescription,
+            'emailSettings' => $this->emailSettings,
+            'features' => $this->features,
+        ];
     }
 }; ?>
 
