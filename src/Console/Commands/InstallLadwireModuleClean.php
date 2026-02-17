@@ -86,7 +86,7 @@ class InstallLadwireModuleClean extends Command
             File::makeDirectory($pagesDir, 0755, true);
         }
         
-        $templatePath = base_path("vendor/ladbu/laravel-ladwire-module/modules/{$module}/resources/views/pages/⚡{$viewName}.blade.php");
+        $templatePath = base_path("vendor/ladbu/laravel-ladwire-module/modules/{$module}/resources/views/pages/⚡{$module}.blade.php");
         
         if (File::exists($templatePath)) {
             $content = File::get($templatePath);
