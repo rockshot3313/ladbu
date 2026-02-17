@@ -4,6 +4,7 @@ namespace Ladbu\LaravelLadwireUserManagement\Http\Livewire;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use App\Models\User;
 
 class UserManagement extends Component
 {
@@ -16,6 +17,7 @@ class UserManagement extends Component
     public $showCreateModal = false;
     public $showEditModal = false;
     public $selectedUserId = null;
+    public $users;
 
     public $name = '';
     public $email = '';
@@ -27,8 +29,12 @@ class UserManagement extends Component
         'role' => 'required|in:admin,user',
     ];
 
+    protected $listeners = ['refreshComponent' => '$refresh'];
+
     public function render()
     {
+        $this->loadUsers();
+        
         return view('laravel-ladwire-user-management::livewire.user-management', [
             'users' => $this->users,
         ]);
@@ -41,24 +47,16 @@ class UserManagement extends Component
 
     public function loadUsers(): void
     {
-        // This is a mock implementation
-        // In a real package, you would query the actual users table
-        $query = collect([
-            ['id' => 1, 'name' => 'John Doe', 'email' => 'john@example.com', 'role' => 'admin', 'created_at' => '2024-01-15'],
-            ['id' => 2, 'name' => 'Jane Smith', 'email' => 'jane@example.com', 'role' => 'user', 'created_at' => '2024-01-16'],
-            ['id' => 3, 'name' => 'Bob Johnson', 'email' => 'bob@example.com', 'role' => 'user', 'created_at' => '2024-01-17'],
-        ]);
+        $query = User::query();
 
         if ($this->search) {
-            $query = $query->filter(function ($user) {
-                return str_contains(strtolower($user['name']), strtolower($this->search)) ||
-                       str_contains(strtolower($user['email']), strtolower($this->search));
+            $query->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->search . '%')
+                  ->orWhere('email', 'like', '%' . $this->search . '%');
             });
         }
 
-        if ($this->sortBy) {
-            $query = $query->sortBy($this->sortBy, $this->sortDirection);
-        }
+        $query->orderBy($this->sortBy, $this->sortDirection);
 
         $this->users = $query->paginate($this->perPage);
     }
@@ -71,8 +69,6 @@ class UserManagement extends Component
             $this->sortBy = $column;
             $this->sortDirection = 'asc';
         }
-        
-        $this->loadUsers();
     }
 
     public function updatingSearch(): void
@@ -89,28 +85,56 @@ class UserManagement extends Component
     {
         $this->validate();
 
-        // In a real implementation, you would create the user here
+        User::create([
+            'name' => $this->name,
+            'email' => $this->email,
+            'password' => bcrypt('password'), // You may want to generate a random password or send an email
+            'role' => $this->role,
+        ]);
+
         $this->reset(['name', 'email', 'role', 'showCreateModal']);
+        $this->loadUsers();
         $this->dispatch('user-created');
     }
 
     public function editUser($userId)
     {
         $this->selectedUserId = $userId;
-        // In a real implementation, you would load the user data here
+        $user = User::find($userId);
+        
+        if ($user) {
+            $this->name = $user->name;
+            $this->email = $user->email;
+            $this->role = $user->role ?? 'user';
+        }
+        
         $this->showEditModal = true;
     }
 
     public function updateUser()
     {
-        // In a real implementation, you would update the user here
-        $this->reset(['selectedUserId', 'showEditModal']);
+        $this->validate([
+            'email' => 'required|email|unique:users,email,' . $this->selectedUserId,
+        ]);
+
+        $user = User::find($this->selectedUserId);
+        if ($user) {
+            $user->update([
+                'name' => $this->name,
+                'email' => $this->email,
+                'role' => $this->role,
+            ]);
+        }
+
+        $this->reset(['selectedUserId', 'name', 'email', 'role', 'showEditModal']);
+        $this->loadUsers();
         $this->dispatch('user-updated');
     }
 
     public function deleteUser($userId)
     {
-        // In a real implementation, you would delete the user here
+        User::find($userId)?->delete();
+        $this->loadUsers();
         $this->dispatch('user-deleted');
     }
 

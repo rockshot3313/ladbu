@@ -30,10 +30,31 @@
 <flux:table>
     <flux:table.header>
         <flux:table.row>
-            <flux:table.heading>Name</flux:table.heading>
-            <flux:table.heading>Email</flux:table.heading>
+            <flux:table.heading>
+                <flux:button variant="ghost" size="sm" wire:click="sort('name')">
+                    Name
+                    @if($sortBy === 'name')
+                        <flux:icon.caret-{{ $sortDirection === 'asc' ? 'up' : 'down' }} class="w-4 h-4" />
+                    @endif
+                </flux:button>
+            </flux:table.heading>
+            <flux:table.heading>
+                <flux:button variant="ghost" size="sm" wire:click="sort('email')">
+                    Email
+                    @if($sortBy === 'email')
+                        <flux:icon.caret-{{ $sortDirection === 'asc' ? 'up' : 'down' }} class="w-4 h-4" />
+                    @endif
+                </flux:button>
+            </flux:table.heading>
             <flux:table.heading>Role</flux:table.heading>
-            <flux:table.heading>Created</flux:table.heading>
+            <flux:table.heading>
+                <flux:button variant="ghost" size="sm" wire:click="sort('created_at')">
+                    Created
+                    @if($sortBy === 'created_at')
+                        <flux:icon.caret-{{ $sortDirection === 'asc' ? 'up' : 'down' }} class="w-4 h-4" />
+                    @endif
+                </flux:button>
+            </flux:table.heading>
             <flux:table.heading>Actions</flux:table.heading>
         </flux:table.row>
     </flux:table.header>
@@ -43,28 +64,28 @@
             <flux:table.row>
                 <flux:table.cell>
                     <div class="flex items-center">
-                        <flux:avatar>{{ substr($user['name'], 0, 1) }}</flux:avatar>
+                        <flux:avatar>{{ substr($user->name, 0, 1) }}</flux:avatar>
                         <div class="ml-4">
-                            <flux:text weight="medium">{{ $user['name'] }}</flux:text>
+                            <flux:text weight="medium">{{ $user->name }}</flux:text>
                         </div>
                     </div>
                 </flux:table.cell>
                 <flux:table.cell>
-                    <flux:text>{{ $user['email'] }}</flux:text>
+                    <flux:text>{{ $user->email }}</flux:text>
                 </flux:table.cell>
                 <flux:table.cell>
-                    <flux:badge variant="{{ $user['role'] === 'admin' ? 'primary' : 'success' }}">
-                        {{ $user['role'] }}
+                    <flux:badge variant="{{ $user->role === 'admin' ? 'primary' : 'success' }}">
+                        {{ $user->role ?? 'user' }}
                     </flux:badge>
                 </flux:table.cell>
                 <flux:table.cell>
-                    <flux:text size="sm" color="gray">{{ $user['created_at'] }}</flux:text>
+                    <flux:text size="sm" color="gray">{{ $user->created_at->format('Y-m-d') }}</flux:text>
                 </flux:table.cell>
                 <flux:table.cell>
-                    <flux:button variant="ghost" size="sm" wire:click="editUser({{ $user['id'] }})">
+                    <flux:button variant="ghost" size="sm" wire:click="editUser({{ $user->id }})">
                         <flux:icon.pencil class="w-4 h-4" />
                     </flux:button>
-                    <flux:button variant="ghost" size="sm" wire:click="deleteUser({{ $user['id'] }})" class="text-red-600">
+                    <flux:button variant="ghost" size="sm" wire:click="deleteUser({{ $user->id }})" class="text-red-600">
                         <flux:icon.trash class="w-4 h-4" />
                     </flux:button>
                 </flux:table.cell>
