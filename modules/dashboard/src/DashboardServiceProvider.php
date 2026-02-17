@@ -49,7 +49,10 @@ class DashboardServiceProvider extends ServiceProvider
         // Register traditional Livewire component
         Livewire::component('laravel-ladwire-dashboard::dashboard', \Ladbu\LaravelLadwireDashboard\Http\Livewire\Dashboard::class);
         
+        // Register page component
+        Livewire::component('laravel-ladwire-dashboard::dashboard-page', \Ladbu\LaravelLadwireDashboard\Http\Livewire\DashboardPage::class);
+        
         // Register inline component following starter kit pattern
-        Livewire::component('pages::dashboard', \Ladbu\LaravelLadwireDashboard\Http\Livewire\Dashboard::class);
+        Livewire::component('pages::dashboard', \Ladbu\LaravelLadwireDashboard\Http\Livewire\DashboardPage::class);
     }
 }

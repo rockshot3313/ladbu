@@ -1,14 +1,14 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Ladbu\LaravelLivewireSettings\Http\Livewire\Settings;
+use Ladbu\LaravelLadwireSettings\Http\Livewire\SettingsPage;
 
 Route::middleware(['web'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/settings', Settings::class)->name('settings');
+        Route::get('/settings', SettingsPage::class)->name('settings');
     });
 });
 
 Route::middleware(['web'])->group(function () {
-    Route::get('/module-settings', Settings::class)->name('module.settings');
+    Route::get('/module-settings', SettingsPage::class)->name('module.settings');
 });
