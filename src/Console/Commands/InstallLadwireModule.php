@@ -15,6 +15,17 @@ class InstallLadwireModule extends Command
     {
         $this->info('Installing Ladwire Module...');
 
+        // Check if Flux UI is installed
+        if (!$this->isFluxInstalled()) {
+            $this->error('❌ Flux UI is not installed!');
+            $this->line('Please install Flux UI first:');
+            $this->line('1. composer require livewire/flux');
+            $this->line('2. php artisan flux:install');
+            $this->newLine();
+            $this->line('After installing Flux UI, run this command again.');
+            return Command::FAILURE;
+        }
+
         $modules = [];
         
         if ($this->option('dashboard')) {
@@ -41,7 +52,16 @@ class InstallLadwireModule extends Command
         $this->info('✅ Ladwire Module installation complete!');
         $this->info('📁 Check your app/Http/Controllers folder for installed controllers.');
         $this->info('📁 Check your routes/web.php for added routes.');
-        $this->info('⚙️  Run "php artisan vendor:publish --tag=ladwire-views" to publish views.');
+        $this->info('⚙️  Run "php artisan vendor:publish --tag=views" to publish views.');
+        
+        return Command::SUCCESS;
+    }
+
+    protected function isFluxInstalled()
+    {
+        return class_exists('Livewire\Flux\FluxServiceProvider') || 
+               File::exists(base_path('vendor/livewire/flux')) ||
+               File::exists(resource_path('views/vendor/flux'));
     }
 
     protected function installDashboard()
