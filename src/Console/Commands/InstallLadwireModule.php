@@ -54,6 +54,9 @@ class InstallLadwireModule extends Command
         // Create route
         $this->addRoute('dashboard', 'DashboardController');
         
+        // Create view
+        $this->createView('dashboard');
+        
         $this->info('✅ Dashboard module installed');
     }
 
@@ -66,6 +69,9 @@ class InstallLadwireModule extends Command
         
         // Create route
         $this->addRoute('user-management', 'UserManagementController');
+        
+        // Create view
+        $this->createView('user-management');
         
         $this->info('✅ User Management module installed');
     }
@@ -80,6 +86,9 @@ class InstallLadwireModule extends Command
         // Create route
         $this->addRoute('settings', 'SettingsController');
         
+        // Create view
+        $this->createView('settings');
+        
         $this->info('✅ Settings module installed');
     }
 
@@ -92,6 +101,43 @@ class InstallLadwireModule extends Command
         $this->installSettings();
         
         $this->info('✅ All modules installed');
+    }
+
+    protected function createView($name)
+    {
+        $viewPath = resource_path("views/ladwire/{$name}.blade.php");
+        
+        // Ensure directory exists
+        $viewDir = resource_path("views/ladwire");
+        if (!File::exists($viewDir)) {
+            File::makeDirectory($viewDir, 0755, true);
+        }
+        
+        $stub = $this->getViewStub($name);
+        
+        File::put($viewPath, $stub);
+        $this->info("Created view: {$viewPath}");
+    }
+
+    protected function getViewStub($name)
+    {
+        $componentMap = [
+            'dashboard' => 'laravel-ladwire-dashboard::dashboard',
+            'user-management' => 'laravel-ladwire-user-management::user-management',
+            'settings' => 'laravel-ladwire-settings::settings',
+        ];
+        
+        $component = $componentMap[$name] ?? "laravel-ladwire-{$name}::{$name}";
+        
+        return <<<BLADE
+@extends('layouts.app')
+
+@section('content')
+    <flux:prose>
+        <livewire:{$component} />
+    </flux:prose>
+@endsection
+BLADE;
     }
 
     protected function createController($name, $route)
@@ -112,10 +158,42 @@ class InstallLadwireModule extends Command
             File::put($routesPath, "<?php\n\nuse Illuminate\Support\Facades\Route;\n\n");
         }
         
-        $routeContent = "Route::get('/{$route}', {$controller}::class)->name('{$route}');\n";
-        File::append($routesPath, $routeContent);
+        // Check if controller is already imported
+        $routesContent = File::get($routesPath);
+        $controllerClass = "App\\Http\\Controllers\\{$controller}";
         
-        $this->info("Added route: /{$route}");
+        if (!str_contains($routesContent, "use {$controllerClass};")) {
+            // Add import at the top after existing imports
+            $lines = explode("\n", $routesContent);
+            $importLine = "use {$controllerClass};";
+            
+            // Find the last use statement and add after it
+            $lastUseIndex = -1;
+            foreach ($lines as $index => $line) {
+                if (str_starts_with(trim($line), 'use ') && !str_contains($line, 'function')) {
+                    $lastUseIndex = $index;
+                }
+            }
+            
+            if ($lastUseIndex >= 0) {
+                array_splice($lines, $lastUseIndex + 1, 0, $importLine);
+            } else {
+                // Add after the opening PHP tag
+                array_splice($lines, 1, 0, $importLine);
+            }
+            
+            File::put($routesPath, implode("\n", $lines));
+        }
+        
+        // Check if route already exists
+        $routePattern = "Route::get('/{$route}'";
+        if (!str_contains($routesContent, $routePattern)) {
+            $routeContent = "\nRoute::get('/{$route}', {$controller}::class)->name('{$route}');";
+            File::append($routesPath, $routeContent);
+            $this->info("Added route: /{$route}");
+        } else {
+            $this->info("Route already exists: /{$route}");
+        }
     }
 
     protected function getControllerStub($name, $route)
@@ -125,15 +203,11 @@ class InstallLadwireModule extends Command
 
 namespace App\Http\Controllers;
 
-use Ladbu\LaravelLadwireModule\Http\Livewire\\{$name};
-
 class {$name}Controller extends Controller
 {
     public function __invoke()
     {
-        return view('ladwire.{$route}', [
-            'component' => '{$name}',
-        ]);
+        return view('ladwire.{$route}');
     }
 }
 PHP;
