@@ -104,8 +104,8 @@ class InstallLadwireModuleClean extends Command
         if (File::exists($webRoutesPath)) {
             $routeContent = File::get($webRoutesPath);
             
-            // Add route with unique identifiers pointing to single-file component
-            $routeLine = "\n// Ladwire Module: {$module}\nRoute::get('/{$module}', function () {\n    return view('pages.{$module}.⚡{$this->getComponentViewName($module)}');\n})->name('{$module}'); // END Ladwire Module: {$module}";
+            // Add route with unique identifiers pointing to Volt component
+            $routeLine = "\n// Ladwire Module: {$module}\nRoute::livewire('/{$module}', 'pages.{$module}.⚡{$this->getComponentViewName($module)}')\n    ->middleware(['auth', 'verified'])\n    ->name('{$module}'); // END Ladwire Module: {$module}";
             $routeContent .= $routeLine;
             
             File::put($webRoutesPath, $routeContent);
