@@ -128,20 +128,23 @@ class RemoveLadwireModule extends Command
         if (File::exists($webRoutesPath)) {
             $routeContent = File::get($webRoutesPath);
             $routePath = $this->getRoutePath($module);
-            $controllerClass = $this->getControllerClass($module);
             
-            // Escape the controller class for regex
-            $escapedControllerClass = preg_quote($controllerClass, '/');
+            // Remove route using unique identifiers
+            $startMarker = "// Ladwire Module: {$routePath}";
+            $endMarker = "// END Ladwire Module: {$routePath}";
             
-            // Remove the route line
-            $pattern = "/Route::get\(['\"]{$routePath}['\"],\s*{$escapedControllerClass}::class\)\s*->name\(['\"][^'\"]*['\"]\);?/";
-            $routeContent = preg_replace($pattern, '', $routeContent);
-            
-            // Remove empty lines
-            $routeContent = preg_replace("/\n\s*\n\s*\n/", "\n\n", $routeContent);
-            
-            File::put($webRoutesPath, $routeContent);
-            $this->info("Removed route: {$routePath}");
+            if (str_contains($routeContent, $startMarker) && str_contains($routeContent, $endMarker)) {
+                $pattern = "/{$startMarker}.*?{$endMarker}/s";
+                $routeContent = preg_replace($pattern, '', $routeContent);
+                
+                // Remove empty lines
+                $routeContent = preg_replace("/\n\s*\n\s*\n/", "\n\n", $routeContent);
+                
+                File::put($webRoutesPath, $routeContent);
+                $this->info("Removed route: {$routePath}");
+            } else {
+                $this->warn("Route not found or not created by Ladwire: {$routePath}");
+            }
         }
     }
 
@@ -157,15 +160,22 @@ class RemoveLadwireModule extends Command
         $sidebarContent = File::get($sidebarPath);
         $moduleInfo = $this->getModuleInfo($module);
         
-        // Remove the sidebar item
-        $pattern = '/<flux:sidebar\.item[^>]*icon="' . preg_quote($moduleInfo['icon'], '/') . '"[^>]*>.*?<\/flux:sidebar\.item>/s';
-        $newSidebarContent = preg_replace($pattern, '', $sidebarContent);
+        // Remove sidebar item using unique identifiers
+        $startMarker = "<!-- Ladwire Module: {$module} -->";
+        $endMarker = "<!-- END Ladwire Module: {$module} -->";
         
-        // Remove empty lines
-        $newSidebarContent = preg_replace("/\n\s*\n\s*\n/", "\n\n", $newSidebarContent);
-        
-        File::put($sidebarPath, $newSidebarContent);
-        $this->info("Removed sidebar item for {$moduleInfo['name']}");
+        if (str_contains($sidebarContent, $startMarker) && str_contains($sidebarContent, $endMarker)) {
+            $pattern = "/{$startMarker}.*?{$endMarker}/s";
+            $newSidebarContent = preg_replace($pattern, '', $sidebarContent);
+            
+            // Remove empty lines
+            $newSidebarContent = preg_replace("/\n\s*\n\s*\n/", "\n\n", $newSidebarContent);
+            
+            File::put($sidebarPath, $newSidebarContent);
+            $this->info("Removed sidebar item for {$moduleInfo['name']}");
+        } else {
+            $this->warn("Sidebar item not found or not created by Ladwire: {$moduleInfo['name']}");
+        }
     }
 
     protected function getModuleInfo($module)
