@@ -4,6 +4,7 @@ namespace Ladbu\LaravelLadwireModule;
 
 use Illuminate\Support\ServiceProvider;
 use Ladbu\LaravelLadwireModule\Console\Commands\InstallLadwireModule;
+use Ladbu\LaravelLadwireModule\Console\Commands\MakeLadwireModule;
 
 class LaravelLadwireModuleServiceProvider extends ServiceProvider
 {
@@ -51,6 +52,7 @@ class LaravelLadwireModuleServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallLadwireModule::class,
+                MakeLadwireModule::class,
             ]);
         }
     }
