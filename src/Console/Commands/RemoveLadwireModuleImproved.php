@@ -4,13 +4,12 @@ namespace Ladbu\LaravelLadwireModule\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
-class RemoveLadwireModule extends Command
+class RemoveLadwireModuleImproved extends Command
 {
-    protected $signature = 'ladwire:remove {module : The module to remove (dashboard, user-management, settings)}';
-    protected $description = 'Remove a Ladwire module';
+    protected $signature = 'ladwire:remove-improved {module : The module to remove (dashboard, user-management, settings)}';
+    protected $description = 'Remove a Ladwire module (improved version with separate route files)';
 
     public function handle()
     {
@@ -28,7 +27,8 @@ class RemoveLadwireModule extends Command
         $this->removeController($module);
         $this->removeLivewireComponent($module);
         $this->removeViews($module);
-        $this->removeRoute($module);
+        $this->removeRouteFile($module);
+        $this->removeRouteInclude($module);
         $this->removeSidebarItem($module);
 
         $this->info("✅ {$this->getModuleName($module)} module removed");
@@ -72,16 +72,6 @@ class RemoveLadwireModule extends Command
         };
     }
 
-    protected function getRoutePath($module)
-    {
-        return match($module) {
-            'dashboard' => '/dashboard',
-            'user-management' => '/user-management',
-            'settings' => '/settings',
-            default => '/' . $module
-        };
-    }
-
     protected function removeController($module)
     {
         $controllerClass = $this->getControllerClass($module);
@@ -121,14 +111,24 @@ class RemoveLadwireModule extends Command
         }
     }
 
-    protected function removeRoute($module)
+    protected function removeRouteFile($module)
+    {
+        $routeFilePath = base_path("routes/ladwire-{$module}.php");
+
+        if (File::exists($routeFilePath)) {
+            File::delete($routeFilePath);
+            $this->info("Removed route file: {$routeFilePath}");
+        }
+    }
+
+    protected function removeRouteInclude($module)
     {
         $webRoutesPath = base_path('routes/web.php');
         
         if (File::exists($webRoutesPath)) {
             $routeContent = File::get($webRoutesPath);
             
-            // Remove route using unique identifiers (matching install command format)
+            // Remove route include using unique identifiers
             $startMarker = "// Ladwire Module: {$module}";
             $endMarker = "// END Ladwire Module: {$module}";
             
@@ -140,9 +140,9 @@ class RemoveLadwireModule extends Command
                 $routeContent = preg_replace("/\n\s*\n\s*\n/", "\n\n", $routeContent);
                 
                 File::put($webRoutesPath, $routeContent);
-                $this->info("Removed route: /{$module}");
+                $this->info("Removed route include: ladwire-{$module}.php");
             } else {
-                $this->warn("Route not found or not created by Ladwire: /{$module}");
+                $this->warn("Route include not found or not created by Ladwire: ladwire-{$module}.php");
             }
         }
     }
@@ -157,7 +157,6 @@ class RemoveLadwireModule extends Command
         }
 
         $sidebarContent = File::get($sidebarPath);
-        $moduleInfo = $this->getModuleInfo($module);
         
         // Remove sidebar item using unique identifiers
         $startMarker = "<!-- Ladwire Module: {$module} -->";
@@ -171,35 +170,9 @@ class RemoveLadwireModule extends Command
             $newSidebarContent = preg_replace("/\n\s*\n\s*\n/", "\n\n", $newSidebarContent);
             
             File::put($sidebarPath, $newSidebarContent);
-            $this->info("Removed sidebar item for {$moduleInfo['name']}");
+            $this->info("Removed sidebar item for {$module}");
         } else {
-            $this->warn("Sidebar item not found or not created by Ladwire: {$moduleInfo['name']}");
+            $this->warn("Sidebar item not found or not created by Ladwire: {$module}");
         }
-    }
-
-    protected function getModuleInfo($module)
-    {
-        return match($module) {
-            'dashboard' => [
-                'name' => 'Dashboard',
-                'route' => 'dashboard',
-                'icon' => 'home',
-            ],
-            'user-management' => [
-                'name' => 'User Management',
-                'route' => 'user-management',
-                'icon' => 'users',
-            ],
-            'settings' => [
-                'name' => 'Settings',
-                'route' => 'settings',
-                'icon' => 'cog',
-            ],
-            default => [
-                'name' => ucfirst($module),
-                'route' => $module,
-                'icon' => 'folder-git-2',
-            ]
-        };
     }
 }
